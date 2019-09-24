@@ -1,0 +1,85 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: RDS SQL server stack.
+
+Parameters:
+  Subnets:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: List of subnet IDs
+
+  DBUsername:
+    Type: String
+
+  DBPassword:
+    Type: String
+    NoEcho: true
+
+  VPC:
+    Type: String
+    Description: ID Of the OnPrem VPC
+
+  OnPremCidr:
+    Type: String
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/0-32
+
+  DbInstanceclass:
+    Type: String
+
+  Engine:
+    Type: String
+
+  EngineVersion:
+    Type: String
+
+Resources:
+  DB:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      AllocatedStorage: '20'
+      BackupRetentionPeriod: '0'
+      DBInstanceClass: !Ref DbInstanceclass
+      DBSubnetGroupName: !Ref SubnetGroup
+      Engine: !Ref Engine
+      EngineVersion: !Ref EngineVersion
+      LicenseModel: license-included
+      MasterUserPassword: !Ref DBPassword
+      MasterUsername: !Ref DBUsername
+      MultiAZ: false
+      PubliclyAccessible: true
+      StorageEncrypted: false
+      StorageType: gp2
+      VPCSecurityGroups:
+        - !GetAtt RDSSecurityGroup.GroupId
+
+  RDSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Sub "Security Group for RDS Instance"
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: rds-sql-sg
+
+  SQLtoRDSSecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      CidrIp: !Ref OnPremCidr
+      Description: sql-from-on-prem
+      FromPort: 1433
+      GroupId: !Ref RDSSecurityGroup
+      IpProtocol: tcp
+      ToPort: 1433
+
+  SubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: !Sub "Subnet group for ${AWS::StackName} SQL server"
+      SubnetIds: !Ref Subnets
+
+Outputs:
+  Endpoint:
+    Value: !GetAtt DB.Endpoint.Address
+
+  RDSSecurityGroup:
+    Value: !Ref RDSSecurityGroup

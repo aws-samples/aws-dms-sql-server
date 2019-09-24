@@ -1,0 +1,51 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: CloudFormation Custom Resource for Vpc Peering DNS configuration.
+
+Parameters:
+  ReplicationInstanceArn:
+    Type: String
+
+  ReplicationTaskArn:
+    Type: String
+
+Resources:
+  DmsTaskConfFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../custom-resource/dms_task_conf/
+      Handler: task.handler
+      Runtime: python3.7
+      Timeout: 30
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - logs:CreateLogGroup
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+              Resource: 'arn:aws:logs:*:*:*'
+            - Effect: Allow
+              Action:
+                - dms:DescribeReplicationInstances
+                - dms:DescribeReplicationTasks
+                - dms:ModifyReplicationTask
+                - dms:StartReplicationTask
+                - dms:StopReplicationTask
+              Resource: '*'
+
+  DmsTaskConf:
+    Type: Custom::DmsTaskConf
+    Version: 1.0
+    Properties:
+      ServiceToken: !GetAtt DmsTaskConfFunction.Arn
+      ReplicationInstanceArn: !Ref ReplicationInstanceArn
+      ReplicationTaskArn: !Ref ReplicationTaskArn
+
+Outputs:
+  DmsTaskConfFunction:
+    Value: !Ref DmsTaskConfFunction
+
+  DmsTaskConf:
+    Value: !Ref DmsTaskConf

@@ -1,0 +1,290 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Provides configuration for a Microsoft SQL instance.
+
+Parameters:
+  VPC:
+    Type: AWS::EC2::VPC::Id
+
+  PublicSubnets:
+    Type: List<String>
+
+  WindowsSQLAMI:
+    Type: AWS::EC2::Image::Id
+
+  WindowsSQLInstanceType:
+    Type: String
+
+  Username:
+    Type: String
+
+  UserPassword:
+    Type: String
+    NoEcho: true
+
+  DBName:
+    Type: String
+
+  RDSEndpoint:
+    Type: String
+
+  RDSSecurityGroup:
+    Description: RDS Security Group ID.
+    Type: AWS::EC2::SecurityGroup::Id
+
+  OnPremCidr:
+    Type: String
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/0-32
+
+  MSSQLVersion:
+    Description: MSSQL Server version. This is used to Change Auth mode from Windows only to SQL and Windows Auth
+      For MSSQL server 2017 use number 14, for MSSQL server 2016 use number 13
+    Type: Number
+
+Resources:
+  WindowsSQLSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for Microsoft SQL instance.
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: windows-sql-sg
+
+  RDPtoEC2SQLSecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      CidrIp: !Ref OnPremCidr
+      Description: rdp-from-on-prem
+      FromPort: 3389
+      GroupId: !Ref WindowsSQLSecurityGroup
+      IpProtocol: tcp
+      ToPort: 3389
+
+  SQLtoEC2SQLSecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      CidrIp: !Ref OnPremCidr
+      Description: sql-from-on-prem
+      FromPort: 1433
+      GroupId: !Ref WindowsSQLSecurityGroup
+      IpProtocol: tcp
+      ToPort: 1433
+
+  EC2toRDSSecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      Description: ec2-sg
+      FromPort: 1433
+      GroupId: !Ref RDSSecurityGroup
+      IpProtocol: tcp
+      SourceSecurityGroupId: !Ref WindowsSQLSecurityGroup
+      ToPort: 1433
+
+  EIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+      InstanceId: !Ref WindowsSQLInstance
+
+  WindowsSQLInstance:
+    Type: AWS::EC2::Instance
+    Metadata:
+      AWS::CloudFormation::Init:
+        config:
+          files:
+            C:\\cfn\\scripts\\change_auth_mode.ps1:
+              content: !Sub |
+                $registryPath = "HKLM:\SOFTWARE\Microsoft\Microsoft SQL Server\MSSQL${MSSQLVersion}.MSSQLSERVER\MSSQLServer"
+                $name = "LoginMode"
+                $value = "2"
+                if (!(Test-Path $registryPath)) {
+                New-Item -Path $registryPath -Force | Out-Null
+                New-ItemProperty -Path $registryPath -Name $name -Value $value -PropertyType DWORD -Force | Out-Null
+                }
+                else {
+                New-ItemProperty -Path $registryPath -Name $name -Value $value -PropertyType DWORD -Force | Out-Null
+                }
+            C:\\cfn\\scripts\\create_dms_sample.sql:
+              content: !Sub |
+                print('Creating database ${DBName}...');
+                go
+                create database ${DBName};
+                go
+            C:\\cfn\\scripts\\create_dms_user.sql:
+              content: !Sub |
+                use master
+                CREATE LOGIN ${Username} WITH PASSWORD = '${UserPassword}', CHECK_POLICY = OFF, DEFAULT_DATABASE = ${DBName};
+                GO
+                EXEC master..sp_addsrvrolemember @loginame = N'${Username}', @rolename = N'sysadmin'
+                GO
+                Use ${DBName};
+                GO
+                IF NOT EXISTS(SELECT * FROM sys.database_principals WHERE name = N'${Username}')
+                BEGIN
+                  CREATE USER [${Username}] FOR LOGIN [${Username}]
+                    use ${DBName}
+                  EXEC sp_addrolemember N'db_owner', N'${Username}'
+                END;
+                GO
+            C:\\cfn\\scripts\\dms_sample_backup.sql:
+              content: !Sub |
+                :setvar BACKUPDIR aws_sampledb_backups
+                USE master;
+                GO
+                EXEC master.dbo.xp_create_subdir 'C:\$(BACKUPDIR)'
+                ALTER DATABASE ${DBName}
+                    SET RECOVERY FULL;
+                GO
+                -- Create AdvWorksData and AdvWorksLog logical backup devices.
+                USE master
+                GO
+                EXEC sp_addumpdevice 'disk', '${DBName}_backup',
+                     'C:\$(BACKUPDIR)\${DBName}.bak';
+                GO
+                EXEC sp_addumpdevice 'disk', '${DBName}_log',
+                     'C:\$(BACKUPDIR)\${DBName}_log.bak';
+                GO
+                -- Back up the full dms_sample database.
+                BACKUP DATABASE ${DBName} TO ${DBName}_backup;
+                GO
+                -- Back up the dms_sample log.
+                BACKUP LOG ${DBName}
+                    TO ${DBName}_log;
+                GO
+            C:\\cfn\\scripts\\enable_replication.sql:
+              content: !Sub |
+                :setvar DistPubServer @@SERVERNAME
+                -- Install the Distributor and the distribution database.
+                DECLARE @distributor AS sysname;
+                DECLARE @distributionDB AS sysname;
+                DECLARE @publisher AS sysname;
+                DECLARE @directory AS nvarchar(500);
+                DECLARE @publicationDB AS sysname;
+                -- Specify the Distributor name.
+                SET @distributor = $(DistPubServer);
+                -- Specify the distribution database.
+                SET @distributionDB = N'distribution';
+                -- Specify the Publisher name.
+                SET @publisher = $(DistPubServer);
+                -- Specify the replication working directory.
+                SET @directory = N'\\' + $(DistPubServer) + '\repldata';
+                -- Specify the publication database.
+                SET @publicationDB = N'${DBName}';
+                -- Install the server MYDISTPUB as a Distributor using the defaults,
+                -- including autogenerating the distributor password.
+                USE master
+                EXEC sp_adddistributor @distributor = @distributor;
+                -- Create a new distribution database using the defaults, including
+                -- using Windows Authentication.
+                USE master
+                EXEC sp_adddistributiondb @database = @distributionDB,
+                    @security_mode = 1;
+                GO
+                -- Create a Publisher and enable dms_sample for replication.
+                -- Add MYDISTPUB as a publisher with MYDISTPUB as a local distributor
+                -- and use Windows Authentication.
+                DECLARE @distributionDB AS sysname;
+                DECLARE @publisher AS sysname;
+                -- Specify the distribution database.
+                SET @distributionDB = N'distribution';
+                -- Specify the Publisher name.
+                SET @publisher = $(DistPubServer);
+                USE [distribution]
+                EXEC sp_adddistpublisher @publisher=@publisher,
+                    @distribution_db=@distributionDB,
+                    @security_mode = 1;
+                GO
+            C:\\cfn\\scripts\\create_rds_db.ps1:
+              content: !Sub |
+                $RDSSQLInstance = "${RDSEndpoint}"
+                $RDSSQLUser = "${Username}"
+                $RDSSQLPassword = "${UserPassword}"
+                $DBName = "${DBName}"
+                # Checking to see if the SqlServer module is already installed.
+                $SQLModuleCheck = Get-Module -ListAvailable SqlServer
+                if ($null -eq $SQLModuleCheck) {
+                write-host "SqlServer Module Not Found - Installing..."
+                Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
+                Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+                # Installing module
+                Install-Module -Name SqlServer -Confirm:$false -AllowClobber -Force
+                }
+                Import-Module SqlServer
+                # Creating SQL Query to create database
+                $SQLDBQuery = "CREATE DATABASE $DBName"
+                # Running the SQL Query, setting result of query to $False if any errors caught
+                Try {
+                $SQLDBResult = $null
+                $SQLDBResult = Invoke-SqlCmd -Query $SQLDBQuery -ServerInstance $RDSSQLInstance -Username $RDSSQLUser -Password $RDSSQLPassword
+                $SQLQuerySuccess = $TRUE
+                }
+                Catch {
+                $SQLQuerySuccess = $FALSE
+                }
+                # Output of the results in cfn/logs
+                "SQLInstance: $RDSSQLInstance"
+                "SQLQueryResult: $SQLQuerySuccess"
+                "SQLQueryOutput:"
+                $SQLDBResult
+          commands:
+            01-create-os-user:
+              command: !Sub |
+                net user /add ${Username} ${UserPassword}
+            02-add-os-user-to-group:
+              command: !Sub |
+                net localgroup Administrators ${Username} /add
+            03-sql-change-auth-mode:
+              command: PowerShell -Command "C:\\cfn\\scripts\\change_auth_mode.ps1"
+            04-restart-sql-server:
+              command: PowerShell -Command "Restart-Service MSSQLSERVER -Force"
+            05-create-dms-sample:
+              command: sqlcmd -i "C:\\cfn\\scripts\\create_dms_sample.sql" 1> NUL
+            06-create-dms-user:
+              command: sqlcmd -i "C:\\cfn\\scripts\\create_dms_user.sql" 1> NUL
+            07-dms-sample-backup:
+              command: sqlcmd -i "C:\\cfn\\scripts\\dms_sample_backup.sql" 1> NUL
+            08-enable-replication:
+              command: sqlcmd -i "C:\\cfn\\scripts\\enable_replication.sql" 1> NUL
+            09-create-rds-db:
+              command: PowerShell -Command "C:\\cfn\\scripts\\create_rds_db.ps1" 1> NUL
+            10-cleanup:
+              command: PowerShell -Command "Remove-Item C:\\cfn\\scripts -Recurse -ErrorAction Ignore"
+    Properties:
+      BlockDeviceMappings:
+        - DeviceName: /dev/sda1
+          Ebs:
+            VolumeSize: 100
+            VolumeType: gp2
+      ImageId: !Ref WindowsSQLAMI
+      InstanceType: !Ref WindowsSQLInstanceType
+      SecurityGroupIds:
+        - !Ref WindowsSQLSecurityGroup
+      SubnetId: !Select [0, !Ref PublicSubnets]
+      Tags:
+        - Key: Name
+          Value: windows-sql-server
+      UserData:
+        Fn::Base64: !Sub |
+          <script>
+          cfn-init.exe -v --stack ${AWS::StackName} --resource WindowsSQLInstance --region ${AWS::Region}
+          cfn-signal.exe -e %errorlevel% --stack ${AWS::StackName} --resource WindowsSQLInstance --region ${AWS::Region}
+          </script>
+
+    CreationPolicy:
+      ResourceSignal:
+        Count: 1
+        Timeout: 'PT15M'
+
+Outputs:
+  WindowsSQLInstance:
+    Value: !Ref WindowsSQLInstance
+
+  WindowsSQLSecurityGroup:
+    Value: !Ref WindowsSQLSecurityGroup
+
+  ElasticIP:
+    Value: !Ref EIP
+
+  PrivateIP:
+    Value: !GetAtt WindowsSQLInstance.PrivateIp

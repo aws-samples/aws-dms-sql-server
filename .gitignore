@@ -1,0 +1,14 @@
+# Local development
+.idea/
+main-packaged.template
+main/.env
+
+# Ignore all the libraries installed via pip
+custom-resource/dms_iam_roles/*
+custom-resource/dms_task_conf/*
+custom-resource/peering_dns_conf/*
+
+# But include the code
+!custom-resource/dms_iam_roles/iam.py
+!custom-resource/dms_task_conf/task.py
+!custom-resource/peering_dns_conf/peering.py

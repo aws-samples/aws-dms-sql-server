@@ -1,0 +1,65 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Parameters:
+  VPC0:
+    Type: AWS::EC2::VPC::Id
+
+  VPCCidr0:
+    Type: String
+
+  VPC1:
+    Type: AWS::EC2::VPC::Id
+
+  VPCCidr1:
+    Type: String
+
+  VPCPublicSubnet1RouteTable0:
+    Type: String
+
+  VPCPublicSubnet2RouteTable0:
+    Type: String
+
+  VPCPublicSubnet1RouteTable1:
+    Type: String
+
+  VPCPublicSubnet2RouteTable1:
+    Type: String
+
+Resources:
+  Peering:
+    Type: AWS::EC2::VPCPeeringConnection
+    Properties:
+      PeerVpcId: !Ref VPC1
+      VpcId: !Ref VPC0
+
+  RouteVPC0PublicSubnet1:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref VPCPublicSubnet1RouteTable0
+      VpcPeeringConnectionId: !Ref Peering
+      DestinationCidrBlock: !Ref VPCCidr1
+
+  RouteVPC0PublicSubnet2:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref VPCPublicSubnet2RouteTable0
+      VpcPeeringConnectionId: !Ref Peering
+      DestinationCidrBlock: !Ref VPCCidr1
+
+  RouteVPC1PublicSubnet1:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref VPCPublicSubnet1RouteTable1
+      VpcPeeringConnectionId: !Ref Peering
+      DestinationCidrBlock: !Ref VPCCidr0
+
+  RouteVPC1PublicSubnet2:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref VPCPublicSubnet2RouteTable1
+      VpcPeeringConnectionId: !Ref Peering
+      DestinationCidrBlock: !Ref VPCCidr0
+
+Outputs:
+  VpcPeeringId:
+    Value: !Ref Peering
