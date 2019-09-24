@@ -12,3 +12,7 @@ custom-resource/peering_dns_conf/*
 !custom-resource/dms_iam_roles/iam.py
 !custom-resource/dms_task_conf/task.py
 !custom-resource/peering_dns_conf/peering.py
+
+!custom-resource/dms_iam_roles/requirements.txt
+!custom-resource/dms_task_conf/requirements.txt
+!custom-resource/peering_dns_conf/requirements.txt

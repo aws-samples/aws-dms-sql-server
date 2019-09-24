@@ -1,0 +1,43 @@
+language: python
+
+python:
+  - "3.7"
+
+before_script:
+  - python --version
+  - for fn in custom-resource/*; do
+      printf "\n--> Installing %s requirements...\n" ${fn}
+      pip install crhelper -t ${fn} --user
+    done
+  - pip install awscli boto3 shyaml --user
+
+script:
+  - if [ $TRAVIS_PULL_REQUEST == true ] && [ $TRAVIS_BRANCH != "master" ]; then
+    VERSION="v$(cat main/main.template | shyaml get-value Globals.Function.Environment.Variables.VERSION)"
+    git tag $VERSION
+  fi
+
+before_deploy:
+  - export VERSION = "v$(cat main/main.template | shyaml get-value Globals.Function.Environment.Variables.VERSION)"
+  - if [ -z "$TRAVIS_TAG" ]; then git tag $VERSION; fi
+  - zip -r "$VERSION.zip" -@ < ci/include.lst
+
+deploy:
+  - provider: releases
+    api_key:
+      secure: iCddiGenu0FqAmlSX8ERfIzkDdeai44N6PNJ4eowrioCOMniab/nqzkkGlOP30+dEfNe9TAykExJzkzI+nX2sAV/3TKr1URcmd0bzbdGh/t93sixoVfeo+pjfi9oUoND9NsPOcwS1djHesRZjRRaEfpsYDlrp15jNLtZLpuyZQRI8KAtzcoDRFYgVKorKxzFrBpK+T/6qbFWiE2X4fU1oZWURi0FYAMRW8DxOzWF1kPuP9jjzcnLU8nH5ooyx9QtTLutEMg/p9p0w+4+Bz3GmnvQ7FvQlZIJsZib9DFGvxfHss9tWgGxLU99tQ2WeTXQ0IfJstKjHPZw0wH5zj7lNfJc5cq+xs6xHEvr/jdrnBgpJKk8TKw2+heGa3Io+NH3hoxyshnSE9fiU9L+xnnaqxcIfIjnSzz5ri9BcDSeMxlkNm3ZxCWkXzupL38AjkWJ4c76B5i58J8QhKpLjGWmewWWz2GG227Jrq5Q5EzmXpOBX4gY3gtkjE+JMBEQ5K238+7cS+Q5g8hjOSf5wkzMLZKSZ5XRYFC0voq8P+YHmpBUscEfJQtD2UJQzHbIgZh262YZ4FOR4eDjcO3XMBbMsu1i+q1dFstPaxcfGJTROOEU5sDG7KcRmtB6KdHTUoJGFw1evfxuMP2nSKBQukJN5fxwYuL4zaZ4y/srtPAZDzc=
+    file: $VERSION.zip
+    skip_cleanup: true
+    on:
+      branch: master
+      condition: type != pull_request
+  - provider: script
+    script: aws s3 cp ./$VERSION.zip s3://$CFN_BUCKET/aws-dms-sql-server/$VERSION/aws-dms-sql-server.zip
+    skip_cleanup: true
+    on:
+      tags: true
+
+notifications:
+  email: false
+
+cache: pip
