@@ -1,0 +1,282 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Creates AWS infrastructure to deploy DMS solution. (uksb-1ppahhhui)
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Network configuration
+        Parameters:
+          - AvailabilityZones
+          - OnPremCidr
+
+      - Label:
+          default: EC2 SQL instance configuration
+        Parameters:
+          - WindowsSQLInstanceType
+          - WindowsSQLAMI
+          - MSSQLVersion
+
+      - Label:
+          default: RDS SQL instance configuration
+        Parameters:
+          - DbInstanceclass
+          - Engine
+          - EngineVersion
+
+      - Label:
+          default: User and database configuration
+        Parameters:
+          - Username
+          - UserPassword
+          - DBName
+
+    ParameterLabels:
+      AvailabilityZones:
+        default: Availability Zones
+
+      OnPremCidr:
+        default: On premise CIDR IP
+
+      WindowsSQLInstanceType:
+        default: EC2 instance type
+
+      WindowsSQLAMI:
+        default: Public Parameter Windows server 2019 with SQL 2016
+
+      MSSQLVersion:
+        default: MSSQL Server version
+
+      DbInstanceclass:
+        default: RDS instance type
+
+      Engine:
+        default: Database engine type
+
+      EngineVersion:
+        default: Database engine version
+
+      Username:
+        default: Windows server and database username
+
+      UserPassword:
+        default: Windows server and database password
+
+      DBName:
+        default: Database name
+
+Parameters:
+  AvailabilityZones:
+    Description: The list of Availability Zones to use for the subnets in the VPC.
+    Type: List<AWS::EC2::AvailabilityZone::Name>
+
+  OnPremCidr:
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/0-32
+    Description: The CIDR Allowed RDP and SQL access to the EC2 and RDS host
+    Type: String
+
+  WindowsSQLAMI:
+    Description: The latest Windows server 2019 with SQL 2016 Standard AMI
+    Default: /aws/service/ami-windows-latest/Windows_Server-2019-English-Full-SQL_2016_SP2_Standard
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+
+  WindowsSQLInstanceType:
+    AllowedValues:
+      - t3.2xlarge
+      - m5.2xlarge
+    Default: m5.2xlarge
+    Description: The instance type for MS SQL server.
+    Type: String
+    
+  MSSQLVersion:
+    Description: MSSQL Server version. This is used to Change Auth mode from Windows only to SQL and Windows Auth
+      For MSSQL server 2017 use number 14, for MSSQL server 2016 use number 13
+    Type: Number
+    Default: 13
+
+  Username:
+    AllowedPattern: ^[a-z0-9,_]{5,15}$
+    ConstraintDescription: Minimum 5 characters must begin with a letter and contain only alphanumeric or "_".
+    Description: The database and instance admin account.
+    MaxLength: 15
+    MinLength: 5
+    Type: String
+
+  UserPassword:
+    AllowedPattern: ^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,16}$
+    ConstraintDescription: Minimum 8 characters, at least one of each of the following; uppercase, lowercase, number, and symbol character such as !@#$%^&*()<>[]{}|_+-=.
+    Description: The password for instance user account. The password can include any printable ASCII character except \"/\", \"\"\", or \"@\".
+    MaxLength: 16
+    MinLength: 8
+    NoEcho: true
+    Type: String
+
+  DBName:
+    Type: String
+    Default: dms_sample
+    Description: Database name
+
+  DbInstanceclass:
+    AllowedValues:
+      - db.m4.large
+      - db.m4.16xlarge
+      - db.r4.large
+      - db.r4.16xlarge
+      - db.m5.large
+      - db.m5.24xlarge
+    Description: Instance class of RDS instance
+    Type: String
+    Default: db.m5.large
+
+  Engine:
+    Type: String
+    Default: sqlserver-se
+    Description: MS SQL engine type
+
+  EngineVersion:
+    Type: String
+    Default: 13.00.5216.0.v1
+    Description: MS SQL Engine version
+
+Mappings:
+  Networks:
+    Network0:
+      VPCCidr: 10.0.0.0/16
+      VPCName: OnPremVPC
+      PublicSubnet1Cidr: 10.0.0.0/24
+      PublicSubnet2Cidr: 10.0.1.0/24
+    Network1:
+      VPCCidr: 10.1.0.0/16
+      VPCName: AWSCloudVPC
+      PublicSubnet1Cidr: 10.1.0.0/24
+      PublicSubnet2Cidr: 10.1.1.0/24
+
+Resources:
+  DMSIAMRoles:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ../cfn/dms-roles.template
+      TimeoutInMinutes: 10
+
+  VPCNetwork0:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ../cfn/network.template
+      TimeoutInMinutes: 20
+      Parameters:
+        AvailabilityZones:
+          Fn::Join:
+            - ','
+            - !Ref AvailabilityZones
+        VPCCidr: !FindInMap [Networks, Network0, VPCCidr]
+        VPCName: !FindInMap [Networks, Network0, VPCName]
+        PublicSubnet1Cidr: !FindInMap [Networks, Network0, PublicSubnet1Cidr]
+        PublicSubnet2Cidr: !FindInMap [Networks, Network0, PublicSubnet2Cidr]
+
+  VPCNetwork1:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ../cfn/network.template
+      TimeoutInMinutes: 20
+      Parameters:
+        AvailabilityZones:
+          Fn::Join:
+            - ','
+            - !Ref AvailabilityZones
+        VPCCidr: !FindInMap [Networks, Network1, VPCCidr]
+        VPCName: !FindInMap [Networks, Network1, VPCName]
+        PublicSubnet1Cidr: !FindInMap [Networks, Network1, PublicSubnet1Cidr]
+        PublicSubnet2Cidr: !FindInMap [Networks, Network1, PublicSubnet2Cidr]
+
+  VPCPeering:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ../cfn/peering.template
+      TimeoutInMinutes: 20
+      Parameters:
+        VPC0: !GetAtt VPCNetwork0.Outputs.VpcID
+        VPC1: !GetAtt VPCNetwork1.Outputs.VpcID
+        VPCCidr0: !FindInMap [Networks, Network0, VPCCidr]
+        VPCCidr1: !FindInMap [Networks, Network1, VPCCidr]
+        VPCPublicSubnet1RouteTable0: !GetAtt VPCNetwork0.Outputs.VPCPublicSubnet1RouteTable
+        VPCPublicSubnet2RouteTable0: !GetAtt VPCNetwork0.Outputs.VPCPublicSubnet2RouteTable
+        VPCPublicSubnet1RouteTable1: !GetAtt VPCNetwork1.Outputs.VPCPublicSubnet1RouteTable
+        VPCPublicSubnet2RouteTable1: !GetAtt VPCNetwork1.Outputs.VPCPublicSubnet2RouteTable
+
+  PeeringDNSConf:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ../cfn/peering-dns-conf.template
+      TimeoutInMinutes: 10
+      Parameters:
+        VpcPeeringId: !GetAtt VPCPeering.Outputs.VpcPeeringId
+
+  RDSSQL:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ../cfn/rds-sql.template
+      TimeoutInMinutes: 30
+      Parameters:
+        DBUsername: !Ref Username
+        DBPassword: !Ref UserPassword
+        Subnets: !GetAtt VPCNetwork1.Outputs.PublicSubnets
+        VPC: !GetAtt VPCNetwork1.Outputs.VpcID
+        OnPremCidr: !Ref OnPremCidr
+        DbInstanceclass: !Ref DbInstanceclass
+        Engine: !Ref Engine
+        EngineVersion: !Ref EngineVersion
+
+  EC2SQL:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ../cfn/ec2-sql.template
+      TimeoutInMinutes: 30
+      Parameters:
+        VPC: !GetAtt VPCNetwork0.Outputs.VpcID
+        PublicSubnets: !GetAtt VPCNetwork0.Outputs.PublicSubnets
+        WindowsSQLAMI: !Ref WindowsSQLAMI
+        WindowsSQLInstanceType: !Ref WindowsSQLInstanceType
+        Username: !Ref Username
+        UserPassword: !Ref UserPassword
+        DBName: !Ref DBName
+        RDSEndpoint: !GetAtt RDSSQL.Outputs.Endpoint
+        RDSSecurityGroup: !GetAtt RDSSQL.Outputs.RDSSecurityGroup
+        OnPremCidr: !Ref OnPremCidr
+        MSSQLVersion: !Ref MSSQLVersion
+    DependsOn:
+      - VPCPeering
+
+  DMSReplication:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ../cfn/dms.template
+      TimeoutInMinutes: 20
+      Parameters:
+        VPC: !GetAtt VPCNetwork1.Outputs.VpcID
+        Database: !Ref DBName
+        DBPassword: !Ref UserPassword
+        Source: !GetAtt EC2SQL.Outputs.PrivateIP
+        Subnets: !GetAtt VPCNetwork1.Outputs.PublicSubnets
+        Target: !GetAtt RDSSQL.Outputs.Endpoint
+        Username: !Ref Username
+        WindowsSQLSecurityGroup: !GetAtt EC2SQL.Outputs.WindowsSQLSecurityGroup
+        RDSSecurityGroup: !GetAtt RDSSQL.Outputs.RDSSecurityGroup
+    DependsOn:
+      - DMSIAMRoles
+      - VPCPeering
+
+  DmsTaskConf:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ../cfn/dms-task-conf.template
+      TimeoutInMinutes: 10
+      Parameters:
+        ReplicationInstanceArn: !GetAtt DMSReplication.Outputs.ReplicationInstanceArn
+        ReplicationTaskArn: !GetAtt DMSReplication.Outputs.ReplicationTaskArn
+
+Outputs:
+  EC2SQLServerEip:
+    Value: !GetAtt EC2SQL.Outputs.ElasticIP
+  RDSSQLEndpoint:
+    Value: !GetAtt RDSSQL.Outputs.Endpoint

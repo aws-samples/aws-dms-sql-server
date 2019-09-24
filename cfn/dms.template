@@ -1,0 +1,122 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Parameters:
+  VPC:
+    Type: AWS::EC2::VPC::Id
+
+  Database:
+    Type: String
+
+  DBPassword:
+    Type: String
+    NoEcho: true
+
+  Source:
+    Type: String
+
+  Target:
+    Type: String
+
+  Username:
+    Type: String
+
+  Subnets:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: List of subnet IDs
+
+  WindowsSQLSecurityGroup:
+    Description: WindowsSQL Security Group ID.
+    Type: AWS::EC2::SecurityGroup::Id
+
+  RDSSecurityGroup:
+    Description: RDS Security Group ID.
+    Type: AWS::EC2::SecurityGroup::Id
+
+Resources:
+  DMSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for DMS instance.
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: dms-sql-sg
+
+  DMStoEC2SQLSecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      Description: dms-sg
+      FromPort: 1433
+      GroupId: !Ref WindowsSQLSecurityGroup
+      IpProtocol: tcp
+      SourceSecurityGroupId: !Ref DMSSecurityGroup
+      ToPort: 1433
+
+  DMStoRDSSecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      Description: dms-sg
+      FromPort: 1433
+      GroupId: !Ref RDSSecurityGroup
+      IpProtocol: tcp
+      SourceSecurityGroupId: !Ref DMSSecurityGroup
+      ToPort: 1433
+
+  ReplicationSubnetGroup:
+    Type: AWS::DMS::ReplicationSubnetGroup
+    Properties:
+      ReplicationSubnetGroupDescription: DMS Subnet Group
+      SubnetIds: !Ref Subnets
+
+  ReplicationInstance:
+    Type: AWS::DMS::ReplicationInstance
+    Properties:
+      PubliclyAccessible: false
+      ReplicationInstanceClass: dms.t2.large
+      ReplicationSubnetGroupIdentifier: !Ref ReplicationSubnetGroup
+      VpcSecurityGroupIds:
+        - !Ref DMSSecurityGroup
+
+  ReplicationTask:
+    Type: AWS::DMS::ReplicationTask
+    Properties:
+      MigrationType: full-load-and-cdc
+      ReplicationInstanceArn: !Ref ReplicationInstance
+      SourceEndpointArn: !Ref SourceEndpoint
+      TableMappings: "{\"rules\": [{\"rule-type\": \"selection\", \"rule-id\": \"1\", \"rule-action\": \"include\", \"object-locator\": {\"schema-name\": \"%\", \"table-name\": \"%\"}, \"rule-name\": \"1\"}]}"
+      TargetEndpointArn: !Ref TargetEndpoint
+
+  SourceEndpoint:
+    Type: AWS::DMS::Endpoint
+    Properties:
+      DatabaseName: !Ref Database
+      EndpointType: source
+      EngineName: sqlserver
+      Password: !Ref DBPassword
+      Port: 1433
+      ServerName: !Ref Source
+      Username: !Ref Username
+
+  TargetEndpoint:
+    Type: AWS::DMS::Endpoint
+    Properties:
+      DatabaseName: !Ref Database
+      EndpointType: target
+      EngineName: sqlserver
+      Password: !Ref DBPassword
+      Port: 1433
+      ServerName: !Ref Target
+      Username: !Ref Username
+
+Outputs:
+  ReplicationInstanceArn:
+    Value: !Ref ReplicationInstance
+    
+  SourceEndpoint:
+    Value: !Ref SourceEndpoint
+    
+  TargetEndpoint:
+    Value: !Ref TargetEndpoint
+    
+  ReplicationTaskArn:
+    Value: !Ref ReplicationTask

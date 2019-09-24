@@ -1,0 +1,44 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: CloudFormation Custom Resource of IAM role for DMS.
+
+Resources:
+  DMSIAMRoleFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../custom-resource/dms_iam_roles/
+      Handler: iam.handler
+      Runtime: python3.7
+      Timeout: 30
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - logs:CreateLogGroup
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+              Resource: 'arn:aws:logs:*:*:*'
+            - Effect: Allow
+              Action:
+                - iam:GetRole
+                - iam:CreateRole
+                - iam:DeleteRole
+                - iam:CreatePolicy
+                - iam:AttachRolePolicy
+                - iam:DetachRolePolicy
+                - iam:DeletePolicy
+              Resource: '*'
+
+  DMSIAMRoles:
+    Type: Custom::DMSIAMRole
+    Version: 1.0
+    Properties:
+      ServiceToken: !GetAtt DMSIAMRoleFunction.Arn
+      
+Outputs:
+  DMSIAMRoleFunction:
+    Value: !Ref DMSIAMRoleFunction
+    
+  DMSIAMRoles:
+    Value: !Ref DMSIAMRoles

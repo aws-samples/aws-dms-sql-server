@@ -1,0 +1,43 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: CloudFormation Custom Resource for Vpc Peering DNS configuration.
+
+Parameters:
+  VpcPeeringId:
+    Type: String
+
+Resources:
+  PeeringDNSConfFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../custom-resource/peering_dns_conf/
+      Handler: peering.handler
+      Runtime: python3.7
+      Timeout: 30
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - logs:CreateLogGroup
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+              Resource: 'arn:aws:logs:*:*:*'
+            - Effect: Allow
+              Action:
+                - ec2:ModifyVpcPeeringConnectionOptions
+              Resource: '*'
+
+  PeeringDNSConf:
+    Type: Custom::PeeringDNSConf
+    Version: 1.0
+    Properties:
+      ServiceToken: !GetAtt PeeringDNSConfFunction.Arn
+      VpcPeeringConnectionId: !Ref VpcPeeringId
+
+Outputs:
+  PeeringDNSConfFunction:
+    Value: !Ref PeeringDNSConfFunction
+
+  PeeringDNSConf:
+    Value: !Ref PeeringDNSConf
