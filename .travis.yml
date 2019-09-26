@@ -20,7 +20,7 @@ script:
     fi
 
 before_deploy:
-  - export VERSION = "v$(cat main/main.template | shyaml get-value Globals.Function.Environment.Variables.VERSION)"
+  - VERSION="v$(cat main/main.template | shyaml get-value Globals.Function.Environment.Variables.VERSION)"
   - if [ -z "$TRAVIS_TAG" ]; then git tag $VERSION; fi
   - zip -r "$VERSION.zip" -@ < ci/include.lst
 
