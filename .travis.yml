@@ -5,14 +5,16 @@ python:
 
 before_script:
   - python --version
-  - for fn in custom-resource/*; do
+  - |
+    for fn in custom-resource/*; do
       printf "\n--> Installing %s requirements...\n" ${fn}
       pip install crhelper -t ${fn}
     done
   - pip install -r requirements.txt
 
 script:
-  - if [ $TRAVIS_PULL_REQUEST == true ] && [ $TRAVIS_BRANCH != "master" ]; then
+  - |
+    if [ $TRAVIS_PULL_REQUEST == true ] && [ $TRAVIS_BRANCH != "master" ]; then
       VERSION="v$(cat main/main.template | shyaml get-value Globals.Function.Environment.Variables.VERSION)"
       git tag $VERSION
     fi
