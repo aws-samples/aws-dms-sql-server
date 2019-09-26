@@ -13,7 +13,8 @@ before_script:
   - pip install -r requirements.txt
 
 script:
-  - if [ $TRAVIS_PULL_REQUEST == true ] && [ $TRAVIS_BRANCH != "master" ]; then
+  - |
+    if [ $TRAVIS_PULL_REQUEST == true ] && [ $TRAVIS_BRANCH != "master" ]; then
       VERSION="v$(cat main/main.template | shyaml get-value Globals.Function.Environment.Variables.VERSION)"
       git tag $VERSION
     fi
