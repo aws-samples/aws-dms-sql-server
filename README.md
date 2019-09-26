@@ -1,4 +1,6 @@
 # Amazon DMS infrastructure with sample SQL server databases
+> Warning: This project is currently being developed and the code shouldn't be used in production.
+
 A CloudFormation template that deploys AWS Database Migration Service (DMS) which continuously replicates data between 
 AWS EC2 SQL server and Amazon RDS database.
 
