@@ -7,9 +7,9 @@ before_script:
   - python --version
   - for fn in custom-resource/*; do
       printf "\n--> Installing %s requirements...\n" ${fn}
-      pip install crhelper -t ${fn} --user
+      pip install crhelper -t ${fn}
     done
-  - pip install awscli boto3 shyaml --user
+  - pip install -r requirements.txt
 
 script:
   - if [ $TRAVIS_PULL_REQUEST == true ] && [ $TRAVIS_BRANCH != "master" ]; then
@@ -25,7 +25,7 @@ before_deploy:
 deploy:
   - provider: releases
     api_key:
-      secure: iCddiGenu0FqAmlSX8ERfIzkDdeai44N6PNJ4eowrioCOMniab/nqzkkGlOP30+dEfNe9TAykExJzkzI+nX2sAV/3TKr1URcmd0bzbdGh/t93sixoVfeo+pjfi9oUoND9NsPOcwS1djHesRZjRRaEfpsYDlrp15jNLtZLpuyZQRI8KAtzcoDRFYgVKorKxzFrBpK+T/6qbFWiE2X4fU1oZWURi0FYAMRW8DxOzWF1kPuP9jjzcnLU8nH5ooyx9QtTLutEMg/p9p0w+4+Bz3GmnvQ7FvQlZIJsZib9DFGvxfHss9tWgGxLU99tQ2WeTXQ0IfJstKjHPZw0wH5zj7lNfJc5cq+xs6xHEvr/jdrnBgpJKk8TKw2+heGa3Io+NH3hoxyshnSE9fiU9L+xnnaqxcIfIjnSzz5ri9BcDSeMxlkNm3ZxCWkXzupL38AjkWJ4c76B5i58J8QhKpLjGWmewWWz2GG227Jrq5Q5EzmXpOBX4gY3gtkjE+JMBEQ5K238+7cS+Q5g8hjOSf5wkzMLZKSZ5XRYFC0voq8P+YHmpBUscEfJQtD2UJQzHbIgZh262YZ4FOR4eDjcO3XMBbMsu1i+q1dFstPaxcfGJTROOEU5sDG7KcRmtB6KdHTUoJGFw1evfxuMP2nSKBQukJN5fxwYuL4zaZ4y/srtPAZDzc=
+      secure: nWXF1XM58lApSO/mVj9rbP5NjBIhPl9NeoJ+crvIHy3+xvGedruqlu/E9Mz3Ijr53RFeHjA2iPVYpHEMc93+8vdZlZjcTtA4eJxUj5FG2jIc0u1NCZXYLhzBA1FcSdg1rrEq2mPLrcCBRA4re9hV9OCG2DWFE27dAnLRxQCfxo09q3A4j4g/ngEXTFE/LFB8ZskGuYeODQecpLk6/q+FhYkIyEUnnhGJfzaPqTPIeMirR3aHwMs/nb6FP1ksB9FLnQvhnxLf2zIeTgrLMlPaUgy+N5ptgcMaEXAMkqNkVin3ERqYU3SA8E/QTfEuPVOzyIEHXOI88MK0HPwLTl5Ltun6FttW1QcyaspcpMWH1EQBj9lqEhOqtMH+53C51R97HoVyTgaTnDrphQ8/QREfkRIOR8jtKbg0mnTn0rs6KujX71C5E75RmGqxWfMqufL/Nu7HqB2nnKPcq2mSoJSQ7xCGxaYA8Ywe7n+2dZR0xhg1IpJJcd1/9HT1qssZ8ghtVtrQUYf5aBdezVI73PqzosAepJZUeWje5Noj3UbyjgbPS6N1gftVvvC1SfNA3GumzeYmnKWue4ITpqI2od+aG0FhECPC+xXkwBA80HuVyyBZTkDLThdTBQAbPc3ZgWO06S2zrLpAXv+yyR/ijlpV3qYuqNATO4eGLQKs5ezPw4Y=
     file: $VERSION.zip
     skip_cleanup: true
     on:
