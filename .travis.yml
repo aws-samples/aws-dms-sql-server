@@ -5,7 +5,8 @@ python:
 
 before_script:
   - python --version
-  - for fn in custom-resource/*; do
+  - |
+    for fn in custom-resource/*; do
       printf "\n--> Installing %s requirements...\n" ${fn}
       pip install crhelper -t ${fn}
     done
