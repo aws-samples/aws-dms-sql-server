@@ -95,7 +95,7 @@ template are pre-populated. Click the *Next* button at the bottom of the page.
    * You can monitor the stack creation progress in the "Events" tab.
 1. Note the *EC2SQLServerEip* and *RDSSQLEndpoint* displayed in the *Outputs* tab of the main stack. This can be used to access the EC2 host and RDS instance.
 
-#### Populating database guide
+### Populating database guide
 
 [Database guide](docs/database/README.md)
 
