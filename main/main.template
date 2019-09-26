@@ -139,9 +139,12 @@ Parameters:
     Default: db.m5.large
 
   Engine:
+    AllowedValues:
+      - sqlserver-se
+      - sqlserver-ee
     Type: String
     Default: sqlserver-se
-    Description: MS SQL engine type
+    Description: The Enterprise, Standard, Workgroup, and Developer editions are supported. The Web and Express editions aren't supported by AWS DMS.
 
   EngineVersion:
     Type: String

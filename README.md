@@ -17,7 +17,7 @@ An AWS CloudFormation template that deploys AWS Database Migration Service (AWS 
   * [Prerequisites](#prerequisites)
   * [Deployment](#deployment)
   * [Populating database guide](#populating-database-guide)
-* [Remove the application](#remove-the-application)
+* [Clean up](#clean-up)
 * [Making changes to the code and customization](#making-changes-to-the-code-and-customization)
 * [Contributing](#contributing)
 
@@ -45,7 +45,7 @@ A DMS migration task will also be created. Upon starting that task (eg; using co
 
 #### Prerequisites
 
-To deploy the application you will require an AWS account. If you don’t already have an AWS account, 
+To deploy the solution, you will require an AWS account. If you don’t already have an AWS account, 
 create one at <https://aws.amazon.com> by following the on-screen instructions. 
 Your access to the AWS account must have IAM permissions to launch AWS CloudFormation templates that create IAM roles.
 
@@ -54,14 +54,15 @@ Your access to the AWS account must have IAM permissions to launch AWS CloudForm
 The application is deployed as an [AWS CloudFormation](https://aws.amazon.com/cloudformation) template.
 
 > **Note**  
-You are responsible for the cost of the AWS services used while running this sample deployment. There is no additional cost for using this sample. For full details, see the pricing pages for each AWS service you will be using in this sample. Prices are subject to change.
+You are responsible for the cost of the AWS services used while running this sample deployment. There is no additional 
+>cost for using this sample. For full details, see the pricing pages for each AWS service you will be using in this sample. Prices are subject to change.
 
 1. Deploy the latest CloudFormation template by following the link below for your preferred AWS region:
 
 |Region|Launch Template|
 |------|---------------|
-|**US East (N. Virginia)** (us-east-1) | [![Launch the EngagementMeter Stack with CloudFormation](docs/deploy-to-aws.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=aws-dms-sql-server&templateURL=https://s3.amazonaws.com/solution-builders-us-east-1/aws-dms-sql-server/v0.1/main.template)|
-|**EU (Ireland)** (eu-west-1) | [![Launch the EngagementMeter Stack with CloudFormation](docs/deploy-to-aws.png)](https://console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks/new?stackName=aws-dms-sql-server&templateURL=https://s3.amazonaws.com/solution-builders-eu-west-1/aws-dms-sql-server/v0.1/main.template)|
+|**US East (N. Virginia)** (us-east-1) | [![Launch the Amazon DMS Data Replication Demo Stack with CloudFormation](docs/deploy-to-aws.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=aws-dms-sql-server&templateURL=https://s3.amazonaws.com/solution-builders-us-east-1/aws-dms-sql-server/latest/main.template)|
+|**EU (Ireland)** (eu-west-1) | [![Launch the Amazon DMS Data Replication Demo Stack with CloudFormation](docs/deploy-to-aws.png)](https://console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks/new?stackName=aws-dms-sql-server&templateURL=https://s3.amazonaws.com/solution-builders-eu-west-1/aws-dms-sql-server/latest/main.template)|
 
 2. If prompted, login using your AWS account credentials.
 1. You should see a screen titled "*Create Stack*" at the "*Specify template*" step. The fields specifying the CloudFormation 
@@ -73,11 +74,11 @@ template are pre-populated. Click the *Next* button at the bottom of the page.
 |Availability Zones|Requires input|The list of Availability Zones to use for the subnets in the VPCs. *Use two AZs*.|
 |On premise CIDR IP|Requires input|The CIDR Allowed RDP and SQL access to the EC2 and RDS host. CIDR block parameter must be in the form x.x.x.x/0-32.|
 |EC2 instance type|m5.2xlarge|The EC2 instance type for Microsoft SQL server.|
-|Windows server AMI|/aws/service/ami-windows-latest/Windows_Server-2019-English-Full-SQL_2016_SP2_Standard|The latest Windows server 2019 with SQL 2016 Standard AMI.|
+|Windows server AMI|/aws/service/ami-windows-latest/Windows_Server-2019-English-Full-SQL_2016_SP2_Standard|Query for the Latest Windows AMI Using Systems Manager Parameter Store https://aws.amazon.com/blogs/mt/query-for-the-latest-windows-ami-using-systems-manager-parameter-store/|
 |MSSQL Server version|13|MSSQL Server version. This is used to Change Auth mode from Windows only to SQL and Windows Auth For MSSQL server 2017 use number 14, for MSSQL server 2016 use number 13.|
 |RDS instance type|db.m5.large|Instance class of RDS instance.|
-|Database engine type|sqlserver-se|MS SQL engine type.|
-|Database engine version|13.00.5216.0.v1|MS SQL Engine version.|
+|Database engine type|sqlserver-se|MS SQL engine type. The Enterprise, Standard, Workgroup, and Developer editions are supported. The Web and Express editions aren't supported by AWS DMS.|
+|Database engine version|13.00.5216.0.v1|SQL Server 2016 SP2 (CU3) engine version13.00.5216.0, for all editions and all AWS Regions.|
 |Windows server and database username|dms_user|The database and instance admin account. Minimum 5 characters must begin with a letter and contain only alphanumeric or "_".|
 |Windows server and database password|Requires input|The password for instance user account. Minimum 8 characters, at least one of each of the following; uppercase, lowercase, number, and symbol character such as !@#$%^&*()<>[]{}|_+-=.|
 |Database name|dms_sample|Database name.|
@@ -102,9 +103,9 @@ template are pre-populated. Click the *Next* button at the bottom of the page.
 ### Limitations
 - MSSQL server 2017 doesnt support continues replication. The solution is using MSSQL server 2016 by default.
 
-### Remove the application
+### Clean up
 
-To remove the application:
+To remove the stack:
 
 1. Open the AWS CloudFormation Console
 1. Click the *aws-dms-sql-server* project, right-click and select "*Delete Stack*"
