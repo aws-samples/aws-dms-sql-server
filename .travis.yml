@@ -1,0 +1,43 @@
+language: python
+
+python:
+  - "3.7"
+
+before_script:
+  - python --version
+  - for fn in custom-resource/*; do
+      printf "\n--> Installing %s requirements...\n" ${fn}
+      pip install crhelper -t ${fn}
+    done
+  - pip install -r requirements.txt
+
+script:
+  - if [ $TRAVIS_PULL_REQUEST == true ] && [ $TRAVIS_BRANCH != "master" ]; then
+    VERSION="v$(cat main/main.template | shyaml get-value Globals.Function.Environment.Variables.VERSION)"
+    git tag $VERSION
+  fi
+
+before_deploy:
+  - export VERSION = "v$(cat main/main.template | shyaml get-value Globals.Function.Environment.Variables.VERSION)"
+  - if [ -z "$TRAVIS_TAG" ]; then git tag $VERSION; fi
+  - zip -r "$VERSION.zip" -@ < ci/include.lst
+
+deploy:
+  - provider: releases
+    api_key:
+      secure: nWXF1XM58lApSO/mVj9rbP5NjBIhPl9NeoJ+crvIHy3+xvGedruqlu/E9Mz3Ijr53RFeHjA2iPVYpHEMc93+8vdZlZjcTtA4eJxUj5FG2jIc0u1NCZXYLhzBA1FcSdg1rrEq2mPLrcCBRA4re9hV9OCG2DWFE27dAnLRxQCfxo09q3A4j4g/ngEXTFE/LFB8ZskGuYeODQecpLk6/q+FhYkIyEUnnhGJfzaPqTPIeMirR3aHwMs/nb6FP1ksB9FLnQvhnxLf2zIeTgrLMlPaUgy+N5ptgcMaEXAMkqNkVin3ERqYU3SA8E/QTfEuPVOzyIEHXOI88MK0HPwLTl5Ltun6FttW1QcyaspcpMWH1EQBj9lqEhOqtMH+53C51R97HoVyTgaTnDrphQ8/QREfkRIOR8jtKbg0mnTn0rs6KujX71C5E75RmGqxWfMqufL/Nu7HqB2nnKPcq2mSoJSQ7xCGxaYA8Ywe7n+2dZR0xhg1IpJJcd1/9HT1qssZ8ghtVtrQUYf5aBdezVI73PqzosAepJZUeWje5Noj3UbyjgbPS6N1gftVvvC1SfNA3GumzeYmnKWue4ITpqI2od+aG0FhECPC+xXkwBA80HuVyyBZTkDLThdTBQAbPc3ZgWO06S2zrLpAXv+yyR/ijlpV3qYuqNATO4eGLQKs5ezPw4Y=
+    file: $VERSION.zip
+    skip_cleanup: true
+    on:
+      branch: master
+      condition: type != pull_request
+  - provider: script
+    script: aws s3 cp ./$VERSION.zip s3://$CFN_BUCKET/aws-dms-sql-server/$VERSION/aws-dms-sql-server.zip
+    skip_cleanup: true
+    on:
+      tags: true
+
+notifications:
+  email: false
+
+cache: pip
