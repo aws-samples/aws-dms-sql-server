@@ -6,7 +6,7 @@ Globals:
   Function:
     Environment:
       Variables:
-        VERSION: '0.1'
+        VERSION: '0.2'
 
 Metadata:
   AWS::CloudFormation::Interface:
@@ -49,7 +49,7 @@ Metadata:
         default: EC2 instance type
 
       WindowsSQLAMI:
-        default: Public Parameter Windows server 2019 with SQL 2016
+        default: Windows server AMI
 
       MSSQLVersion:
         default: MSSQL Server version
@@ -80,7 +80,7 @@ Parameters:
   OnPremCidr:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
     ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/0-32
-    Description: The CIDR Allowed RDP and SQL access to the EC2 and RDS host
+    Description: The CIDR Allowed RDP and SQL access to the EC2 and RDS host. CIDR block parameter must be in the form x.x.x.x/0-32.
     Type: String
 
   WindowsSQLAMI:
@@ -105,7 +105,8 @@ Parameters:
   Username:
     AllowedPattern: ^[a-z0-9,_]{5,15}$
     ConstraintDescription: Minimum 5 characters must begin with a letter and contain only alphanumeric or "_".
-    Description: The database and instance admin account.
+    Description: The database and instance admin account. Minimum 5 characters must begin with a letter and contain only alphanumeric or "_".
+    Default: dms_user
     MaxLength: 15
     MinLength: 5
     Type: String
@@ -113,7 +114,8 @@ Parameters:
   UserPassword:
     AllowedPattern: ^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,16}$
     ConstraintDescription: Minimum 8 characters, at least one of each of the following; uppercase, lowercase, number, and symbol character such as !@#$%^&*()<>[]{}|_+-=.
-    Description: The password for instance user account. The password can include any printable ASCII character except \"/\", \"\"\", or \"@\".
+    Description: The password for instance user account. Minimum 8 characters, at least one of each of the following;
+      uppercase, lowercase, number, and symbol character such as !@#$%^&*()<>[]{}|_+-=.
     MaxLength: 16
     MinLength: 8
     NoEcho: true
@@ -137,9 +139,12 @@ Parameters:
     Default: db.m5.large
 
   Engine:
+    AllowedValues:
+      - sqlserver-se
+      - sqlserver-ee
     Type: String
     Default: sqlserver-se
-    Description: MS SQL engine type
+    Description: The Enterprise, Standard, Workgroup, and Developer editions are supported. The Web and Express editions aren't supported by AWS DMS.
 
   EngineVersion:
     Type: String
