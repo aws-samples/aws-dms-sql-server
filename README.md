@@ -71,6 +71,7 @@ You are responsible for the cost of the AWS services used while running this sam
 |------|---------------|
 |**US East (N. Virginia)** (us-east-1) | [![Launch the Amazon DMS Data Replication Demo Stack with CloudFormation](docs/deploy-to-aws.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=aws-dms-sql-server&templateURL=https://s3.amazonaws.com/solution-builders-us-east-1/aws-dms-sql-server/latest/main.template)|
 |**EU (Ireland)** (eu-west-1) | [![Launch the Amazon DMS Data Replication Demo Stack with CloudFormation](docs/deploy-to-aws.png)](https://console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks/new?stackName=aws-dms-sql-server&templateURL=https://s3.amazonaws.com/solution-builders-eu-west-1/aws-dms-sql-server/latest/main.template)|
+|**EU (London)** (eu-west-2) | [![Launch the Amazon DMS Data Replication Demo Stack with CloudFormation](docs/deploy-to-aws.png)](https://console.aws.amazon.com/cloudformation/home?region=eu-west-2#/stacks/new?stackName=aws-dms-sql-server&templateURL=https://s3.amazonaws.com/solution-builders-eu-west-2/aws-dms-sql-server/latest/main.template)|
 
 2. If prompted, login using your AWS account credentials.
 1. You should see a screen titled "*Create Stack*" at the "*Specify template*" step. The fields specifying the CloudFormation 
