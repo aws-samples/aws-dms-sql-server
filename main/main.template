@@ -6,7 +6,7 @@ Globals:
   Function:
     Environment:
       Variables:
-        VERSION: '0.2'
+        VERSION: '0.3'
 
 Metadata:
   AWS::CloudFormation::Interface:
