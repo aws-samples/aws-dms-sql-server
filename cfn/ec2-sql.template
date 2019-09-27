@@ -274,7 +274,7 @@ Resources:
     CreationPolicy:
       ResourceSignal:
         Count: 1
-        Timeout: 'PT15M'
+        Timeout: 'PT30M'
 
 Outputs:
   WindowsSQLInstance:
