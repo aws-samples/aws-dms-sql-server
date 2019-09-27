@@ -1,7 +1,5 @@
 [![Build Status](https://travis-ci.org/aws-samples/aws-dms-sql-server.svg?branch=master)](https://travis-ci.org/aws-samples/aws-dms-sql-server)
 
-> Warning: This project is currently being developed and the code shouldn't be used in production.
-
 ## MS SQL Server - AWS Database Migration Service (DMS) Replication Demo
 
 #### Database migration from a simulated on-premises MS SQL Server to an Amazon RDS instance in AWS Cloud
@@ -73,7 +71,7 @@ You are responsible for the cost of the AWS services used while running this sam
 |**EU (Ireland)** (eu-west-1) | [![Launch the Amazon DMS Data Replication Demo Stack with CloudFormation](docs/deploy-to-aws.png)](https://console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks/new?stackName=aws-dms-sql-server&templateURL=https://s3.amazonaws.com/solution-builders-eu-west-1/aws-dms-sql-server/latest/main.template)|
 |**EU (London)** (eu-west-2) | [![Launch the Amazon DMS Data Replication Demo Stack with CloudFormation](docs/deploy-to-aws.png)](https://console.aws.amazon.com/cloudformation/home?region=eu-west-2#/stacks/new?stackName=aws-dms-sql-server&templateURL=https://s3.amazonaws.com/solution-builders-eu-west-2/aws-dms-sql-server/latest/main.template)|
 |**EU (Frankfurt)** (eu-central-1) | [![Launch the Amazon DMS Data Replication Demo Stack with CloudFormation](docs/deploy-to-aws.png)](https://console.aws.amazon.com/cloudformation/home?region=eu-central-1#/stacks/new?stackName=aws-dms-sql-server&templateURL=https://s3.amazonaws.com/solution-builders-eu-central-1/aws-dms-sql-server/latest/main.template)|
-|**AP (Sidney)** (ap-southeast-2) | [![Launch the Amazon DMS Data Replication Demo Stack with CloudFormation](docs/deploy-to-aws.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-southeast-2#/stacks/new?stackName=aws-dms-sql-server&templateURL=https://s3.amazonaws.com/solution-builders-ap-southeast-2/aws-dms-sql-server/latest/main.template)|
+|**AP (Sydney)** (ap-southeast-2) | [![Launch the Amazon DMS Data Replication Demo Stack with CloudFormation](docs/deploy-to-aws.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-southeast-2#/stacks/new?stackName=aws-dms-sql-server&templateURL=https://s3.amazonaws.com/solution-builders-ap-southeast-2/aws-dms-sql-server/latest/main.template)|
 
 2. If prompted, login using your AWS account credentials.
 1. You should see a screen titled "*Create Stack*" at the "*Specify template*" step. The fields specifying the CloudFormation 
