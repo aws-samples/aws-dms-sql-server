@@ -2,7 +2,7 @@
 
 > Warning: This project is currently being developed and the code shouldn't be used in production.
 
-## MS SQL Server - Amazon DMS Data Replication Demo
+## MS SQL Server - AWS DMS Data Replication Demo
 
 #### Database migration from a simulated on-premises MS SQL Server to an Amazon RDS instance in AWS Cloud
 
@@ -39,7 +39,15 @@ A DMS migration task will also be created. Upon starting that task (eg; using co
 
 ### Architecture
 
-> diagram here
+The AWS DMS demo uses:
+* [AWS Database Migration Service (DMS)](https://aws.amazon.com/dms) for migration and continues replication of database.
+* [Amazon Relational Database Service (RDS)](https://aws.amazon.com/rds) as a target database to replicate to.
+* [Amazon EC2](https://aws.amazon.com/ec2) as a source database for simulating on prem database to migrate from.
+* [Amazon Virtual Private Cloud](https://aws.amazon.com/vpc) to launch AWS resources in logically isolated virtual network.
+
+An overview of the architecture is below:
+
+![Architecture](docs/arch_diagram.png)
 
 ### Usage
 
@@ -75,7 +83,7 @@ template are pre-populated. Click the *Next* button at the bottom of the page.
 |On premise CIDR IP|Requires input|The CIDR Allowed RDP and SQL access to the EC2 and RDS host. CIDR block parameter must be in the form x.x.x.x/0-32.|
 |EC2 instance type|m5.2xlarge|The EC2 instance type for Microsoft SQL server.|
 |Windows server AMI|/aws/service/ami-windows-latest/Windows_Server-2019-English-Full-SQL_2016_SP2_Standard|Query for the Latest Windows AMI Using Systems Manager Parameter Store https://aws.amazon.com/blogs/mt/query-for-the-latest-windows-ami-using-systems-manager-parameter-store/|
-|MSSQL Server version|13|MSSQL Server version. This is used to Change Auth mode from Windows only to SQL and Windows Auth For MSSQL server 2017 use number 14, for MSSQL server 2016 use number 13.|
+|MSSQL Server version|13|MSSQL Server version. This is used to Change Auth mode from Windows only to SQL and Windows Auth. For MSSQL server 2017 use number 14, for MSSQL server 2016 use number 13.|
 |RDS instance type|db.m5.large|Instance class of RDS instance.|
 |Database engine type|sqlserver-se|MS SQL engine type. The Enterprise, Standard, Workgroup, and Developer editions are supported. The Web and Express editions aren't supported by AWS DMS.|
 |Database engine version|13.00.5216.0.v1|SQL Server 2016 SP2 (CU3) engine version13.00.5216.0, for all editions and all AWS Regions.|
