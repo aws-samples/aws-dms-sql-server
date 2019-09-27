@@ -2,7 +2,7 @@
 
 > Warning: This project is currently being developed and the code shouldn't be used in production.
 
-## MS SQL Server - AWS DMS Data Replication Demo
+## MS SQL Server - AWS Database Migration Service (DMS) Replication Demo
 
 #### Database migration from a simulated on-premises MS SQL Server to an Amazon RDS instance in AWS Cloud
 
@@ -18,7 +18,6 @@ An AWS CloudFormation template that deploys AWS Database Migration Service (AWS 
   * [Deployment](#deployment)
   * [Populating database guide](#populating-database-guide)
 * [Clean up](#clean-up)
-* [Making changes to the code and customization](#making-changes-to-the-code-and-customization)
 * [Contributing](#contributing)
 
 #### Introduction
@@ -40,10 +39,10 @@ A DMS migration task will also be created. Upon starting that task (eg; using co
 ### Architecture
 
 The AWS DMS demo uses:
-* [AWS Database Migration Service (DMS)](https://aws.amazon.com/dms) for migration and continues replication of database.
+* [AWS Database Migration Service (DMS)](https://aws.amazon.com/dms) to migrate and provide continuous replication of a database.
 * [Amazon Relational Database Service (RDS)](https://aws.amazon.com/rds) as a target database to replicate to.
-* [Amazon EC2](https://aws.amazon.com/ec2) as a source database for simulating on prem database to migrate from.
-* [Amazon Virtual Private Cloud](https://aws.amazon.com/vpc) to launch AWS resources in logically isolated virtual network.
+* [Amazon EC2](https://aws.amazon.com/ec2) as a source database for simulating an on-premises database server to migrate from.
+* [Amazon Virtual Private Cloud](https://aws.amazon.com/vpc) to launch AWS resources in a logically isolated virtual network.
 
 An overview of the architecture is below:
 
@@ -70,8 +69,11 @@ You are responsible for the cost of the AWS services used while running this sam
 |Region|Launch Template|
 |------|---------------|
 |**US East (N. Virginia)** (us-east-1) | [![Launch the Amazon DMS Data Replication Demo Stack with CloudFormation](docs/deploy-to-aws.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=aws-dms-sql-server&templateURL=https://s3.amazonaws.com/solution-builders-us-east-1/aws-dms-sql-server/latest/main.template)|
+|**US West (Oregon)** (us-west-2) | [![Launch the Amazon DMS Data Replication Demo Stack with CloudFormation](docs/deploy-to-aws.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=aws-dms-sql-server&templateURL=https://s3.amazonaws.com/solution-builders-us-west-2/aws-dms-sql-server/latest/main.template)|
 |**EU (Ireland)** (eu-west-1) | [![Launch the Amazon DMS Data Replication Demo Stack with CloudFormation](docs/deploy-to-aws.png)](https://console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks/new?stackName=aws-dms-sql-server&templateURL=https://s3.amazonaws.com/solution-builders-eu-west-1/aws-dms-sql-server/latest/main.template)|
 |**EU (London)** (eu-west-2) | [![Launch the Amazon DMS Data Replication Demo Stack with CloudFormation](docs/deploy-to-aws.png)](https://console.aws.amazon.com/cloudformation/home?region=eu-west-2#/stacks/new?stackName=aws-dms-sql-server&templateURL=https://s3.amazonaws.com/solution-builders-eu-west-2/aws-dms-sql-server/latest/main.template)|
+|**EU (Frankfurt)** (eu-central-1) | [![Launch the Amazon DMS Data Replication Demo Stack with CloudFormation](docs/deploy-to-aws.png)](https://console.aws.amazon.com/cloudformation/home?region=eu-central-1#/stacks/new?stackName=aws-dms-sql-server&templateURL=https://s3.amazonaws.com/solution-builders-eu-central-1/aws-dms-sql-server/latest/main.template)|
+|**AP (Sidney)** (ap-southeast-2) | [![Launch the Amazon DMS Data Replication Demo Stack with CloudFormation](docs/deploy-to-aws.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-southeast-2#/stacks/new?stackName=aws-dms-sql-server&templateURL=https://s3.amazonaws.com/solution-builders-ap-southeast-2/aws-dms-sql-server/latest/main.template)|
 
 2. If prompted, login using your AWS account credentials.
 1. You should see a screen titled "*Create Stack*" at the "*Specify template*" step. The fields specifying the CloudFormation 
@@ -120,10 +122,6 @@ To remove the stack:
 1. Click the *aws-dms-sql-server* project, right-click and select "*Delete Stack*"
 1. Your stack will take some time to be deleted. You can track its progress in the "Events" tab.
 1. When it is done, the status will change from DELETE_IN_PROGRESS" to "DELETE_COMPLETE". It will then disappear from the list.
-
-### Making changes to the code and customization
-
-The [contributing guidelines](CONTRIBUTING.md) contains some instructions about how to run the front-end locally and make changes to the back-end stack.
 
 ## Contributing
 
