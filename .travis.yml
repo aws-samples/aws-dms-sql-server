@@ -8,7 +8,7 @@ before_script:
   - |
     for fn in custom-resource/*; do
       printf "\n--> Installing %s requirements...\n" ${fn}
-      pip install crhelper -t ${fn}
+      pip install -r ${fn}/requirements.txt -t ${fn}
     done
   - pip install -r requirements.txt
 

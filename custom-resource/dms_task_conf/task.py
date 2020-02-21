@@ -33,9 +33,10 @@ def delete(event, context):
     properties = event.get('ResourceProperties', None)
     replication_task_arn = properties.get('ReplicationTaskArn')
 
-    client.stop_replication_task(
-        ReplicationTaskArn=replication_task_arn
-    )
+    if _describe(replication_task_arn) == 'running':
+        client.stop_replication_task(
+            ReplicationTaskArn=replication_task_arn
+        )
 
 
 def handler(event, context):
@@ -53,5 +54,23 @@ def _create(replication_task_arn):
     except FileNotFoundError as e:
         logger.error("Unable to load task config")
         logger.error(e)
+    except ClientError as e:
+        logger.error(e)
+
+
+def _describe(replication_task_arn):
+    try:
+        describe_replication_tasks = client.describe_replication_task(
+            Filters=[
+                {
+                    'Name': 'replication-task-arn',
+                    'Value': [
+                        replication_task_arn
+                    ]
+                }
+            ]
+        )
+        return describe_replication_tasks['ReplicationTasks'][0]['Status']
+
     except ClientError as e:
         logger.error(e)

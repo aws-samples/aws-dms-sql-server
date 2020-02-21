@@ -1,6 +1,8 @@
 # Local development
 .idea/
 main-packaged.template
+.env
+deploy.sh
 
 # Ignore all the libraries installed via pip
 custom-resource/dms_iam_roles/*
