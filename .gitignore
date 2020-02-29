@@ -2,6 +2,8 @@
 .idea/
 main-packaged.template
 .env
+deploy.sh
+.DS_Store
 
 # Ignore all the libraries installed via pip
 custom-resource/dms_iam_roles/*
