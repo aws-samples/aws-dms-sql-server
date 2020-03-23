@@ -22,7 +22,7 @@ script:
 before_deploy:
   - mkdir -p ~/.aws
   - |
-    cat >> ~/.aws/config << EOF
+    cat >> ~/.aws/config <<EOF
     [profile publisher]
     credential_source=Environment
     role_arn=${ROLE_ARN}
