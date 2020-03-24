@@ -13,24 +13,17 @@ before_script:
   - pip install -r requirements.txt
 
 script:
-  - |
-    if [ $TRAVIS_PULL_REQUEST == true ] && [ $TRAVIS_BRANCH != "master" ]; then
-      VERSION="v$(cat main/main.template | shyaml get-value Globals.Function.Environment.Variables.VERSION)"
-      git tag $VERSION
-    fi
+  - cfn-lint main/main.template
 
 before_deploy:
   - mkdir -p ~/.aws
-  - |
-    cat >> ~/.aws/config <<EOF
-    [profile publisher]
-    credential_source=Environment
-    role_arn=${ROLE_ARN}
-    duration_seconds=900
-    EOF
-  - VERSION="v$(cat main/main.template | shyaml get-value Globals.Function.Environment.Variables.VERSION)"
-  - if [ -z "$TRAVIS_TAG" ]; then git tag $VERSION; fi
+  - cat >> ~/.aws/config <<<"[profile publisher]"$'\n'"credential_source=Environment"$'\n'"role_arn=${ROLE_ARN}"$'\n'"duration_seconds=900"
+  - LATEST_VERSION="$(git describe --abbrev=0 --tags 2> /dev/null || echo 'v0')"
+  - NEXT_VERSION="v$((${LATEST_VERSION##*[^0-9]} + 1 ))"
+  - export VERSION=${TRAVIS_TAG:-$NEXT_VERSION}
+  - echo "Deploying version $VERSION"
   - zip -r "$VERSION.zip" -@ < ci/include.lst
+  - if [ -z "$TRAVIS_TAG" ]; then git tag $VERSION; fi
 
 deploy:
   - provider: releases
