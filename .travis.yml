@@ -13,6 +13,7 @@ before_script:
   - pip install -r requirements.txt
 
 script:
+  - cfn-lint main/main.template
   - |
     if [ $TRAVIS_PULL_REQUEST == true ] && [ $TRAVIS_BRANCH != "master" ]; then
       VERSION="v$(cat main/main.template | shyaml get-value Globals.Function.Environment.Variables.VERSION)"
@@ -20,6 +21,8 @@ script:
     fi
 
 before_deploy:
+  - mkdir -p ~/.aws
+  - cat >> ~/.aws/config <<<"[profile publisher]"$'\n'"credential_source=Environment"$'\n'"role_arn=${ROLE_ARN}"$'\n'"duration_seconds=900"
   - VERSION="v$(cat main/main.template | shyaml get-value Globals.Function.Environment.Variables.VERSION)"
   - if [ -z "$TRAVIS_TAG" ]; then git tag $VERSION; fi
   - zip -r "$VERSION.zip" -@ < ci/include.lst
@@ -34,7 +37,7 @@ deploy:
       branch: master
       condition: type != pull_request
   - provider: script
-    script: aws s3 cp ./$VERSION.zip s3://$CFN_BUCKET/aws-dms-sql-server/$VERSION/aws-dms-sql-server.zip
+    script: aws s3 cp --profile publisher ./$VERSION.zip s3://$CFN_BUCKET/aws-dms-sql-server/$VERSION/aws-dms-sql-server.zip > /dev/null 2>&1
     skip_cleanup: true
     on:
       tags: true
