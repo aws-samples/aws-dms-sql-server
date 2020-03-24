@@ -92,7 +92,7 @@ Resources:
       DatabaseName: !Ref Database
       EndpointType: source
       EngineName: sqlserver
-      Password: !Ref DBPassword
+      Password: !Ref DBPassword #pragma: allowlist secret
       Port: 1433
       ServerName: !Ref Source
       Username: !Ref Username
@@ -103,7 +103,7 @@ Resources:
       DatabaseName: !Ref Database
       EndpointType: target
       EngineName: sqlserver
-      Password: !Ref DBPassword
+      Password: !Ref DBPassword #pragma: allowlist secret
       Port: 1433
       ServerName: !Ref Target
       Username: !Ref Username
@@ -111,12 +111,12 @@ Resources:
 Outputs:
   ReplicationInstanceArn:
     Value: !Ref ReplicationInstance
-    
+
   SourceEndpoint:
     Value: !Ref SourceEndpoint
-    
+
   TargetEndpoint:
     Value: !Ref TargetEndpoint
-    
+
   ReplicationTaskArn:
     Value: !Ref ReplicationTask

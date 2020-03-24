@@ -6,7 +6,7 @@ Globals:
   Function:
     Environment:
       Variables:
-        VERSION: '1.3'
+        VERSION: '1.4'
 
 Metadata:
   AWS::CloudFormation::Interface:
@@ -231,7 +231,7 @@ Resources:
       TimeoutInMinutes: 30
       Parameters:
         DBUsername: !Ref Username
-        DBPassword: !Ref UserPassword
+        DBPassword: !Ref UserPassword # pragma: allowlist secret
         Subnets: !GetAtt VPCNetwork1.Outputs.PublicSubnets
         VPC: !GetAtt VPCNetwork1.Outputs.VpcID
         OnPremCidr: !Ref OnPremCidr
@@ -250,7 +250,7 @@ Resources:
         WindowsSQLAMI: !Ref WindowsSQLAMI
         WindowsSQLInstanceType: !Ref WindowsSQLInstanceType
         Username: !Ref Username
-        UserPassword: !Ref UserPassword
+        UserPassword: !Ref UserPassword # pragma: allowlist secret
         DBName: !Ref DBName
         RDSEndpoint: !GetAtt RDSSQL.Outputs.Endpoint
         RDSSecurityGroup: !GetAtt RDSSQL.Outputs.RDSSecurityGroup
@@ -267,7 +267,7 @@ Resources:
       Parameters:
         VPC: !GetAtt VPCNetwork1.Outputs.VpcID
         Database: !Ref DBName
-        DBPassword: !Ref UserPassword
+        DBPassword: !Ref UserPassword # pragma: allowlist secret
         Source: !GetAtt EC2SQL.Outputs.PrivateIP
         Subnets: !GetAtt VPCNetwork1.Outputs.PublicSubnets
         Target: !GetAtt RDSSQL.Outputs.Endpoint

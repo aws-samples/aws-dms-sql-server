@@ -180,6 +180,6 @@ Outputs:
 
   VPCPublicSubnet1RouteTable:
     Value: !Ref VPCPublicSubnet1RouteTable
-    
+
   VPCPublicSubnet2RouteTable:
     Value: !Ref VPCPublicSubnet2RouteTable

@@ -2,21 +2,20 @@ import json
 import logging
 
 import boto3
-
 from botocore.exceptions import ClientError
 from crhelper import CfnResource
 
 logger = logging.getLogger(__name__)
-helper = CfnResource(json_logging=False, log_level='DEBUG', boto_level='CRITICAL')
-client = boto3.client('dms')
+helper = CfnResource(json_logging=False, log_level="DEBUG", boto_level="CRITICAL")
+client = boto3.client("dms")
 
 
 @helper.create
 def create(event, context):
     logger.info("Got Create")
 
-    properties = event.get('ResourceProperties', None)
-    replication_task_arn = properties.get('ReplicationTaskArn')
+    properties = event.get("ResourceProperties", None)
+    replication_task_arn = properties.get("ReplicationTaskArn")
 
     _create(replication_task_arn)
 
@@ -30,13 +29,11 @@ def update(event, context):
 def delete(event, context):
     logger.info("Got Delete")
 
-    properties = event.get('ResourceProperties', None)
-    replication_task_arn = properties.get('ReplicationTaskArn')
+    properties = event.get("ResourceProperties", None)
+    replication_task_arn = properties.get("ReplicationTaskArn")
 
-    if _describe(replication_task_arn) == 'running':
-        client.stop_replication_task(
-            ReplicationTaskArn=replication_task_arn
-        )
+    if _describe(replication_task_arn) == "running":
+        client.stop_replication_task(ReplicationTaskArn=replication_task_arn)
 
 
 def handler(event, context):
@@ -45,11 +42,11 @@ def handler(event, context):
 
 def _create(replication_task_arn):
     try:
-        with open('task_settings.json') as f:
+        with open("task_settings.json") as f:
             data = json.load(f)
         client.modify_replication_task(
             ReplicationTaskArn=replication_task_arn,
-            ReplicationTaskSettings=json.dumps(data)
+            ReplicationTaskSettings=json.dumps(data),
         )
     except FileNotFoundError as e:
         logger.error("Unable to load task config")
@@ -61,16 +58,9 @@ def _create(replication_task_arn):
 def _describe(replication_task_arn):
     try:
         describe_replication_tasks = client.describe_replication_task(
-            Filters=[
-                {
-                    'Name': 'replication-task-arn',
-                    'Value': [
-                        replication_task_arn
-                    ]
-                }
-            ]
+            Filters=[{"Name": "replication-task-arn", "Value": [replication_task_arn]}]
         )
-        return describe_replication_tasks['ReplicationTasks'][0]['Status']
+        return describe_replication_tasks["ReplicationTasks"][0]["Status"]
 
     except ClientError as e:
         logger.error(e)

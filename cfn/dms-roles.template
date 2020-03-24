@@ -35,10 +35,10 @@ Resources:
     Version: 1.0
     Properties:
       ServiceToken: !GetAtt DMSIAMRoleFunction.Arn
-      
+
 Outputs:
   DMSIAMRoleFunction:
     Value: !Ref DMSIAMRoleFunction
-    
+
   DMSIAMRoles:
     Value: !Ref DMSIAMRoles

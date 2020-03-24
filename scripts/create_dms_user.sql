@@ -1,5 +1,5 @@
 use master
-CREATE LOGIN dms_user WITH PASSWORD = 'dms_user', CHECK_POLICY = OFF, DEFAULT_DATABASE = dms_sample;
+CREATE LOGIN dms_user WITH PASSWORD = 'dms_user', CHECK_POLICY = OFF, DEFAULT_DATABASE = dms_sample; /* pragma: allowlist secret */
 GO
 EXEC master..sp_addsrvrolemember @loginame = N'dms_user', @rolename = N'sysadmin'
 GO

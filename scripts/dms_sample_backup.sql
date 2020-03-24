@@ -24,4 +24,3 @@ GO
 BACKUP LOG dms_sample
     TO dms_sample_log;
 GO
-

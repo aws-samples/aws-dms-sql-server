@@ -22,16 +22,16 @@ An AWS CloudFormation template that deploys AWS Database Migration Service (AWS 
 
 This repository demonstrates the ease of database migration from an on-premises SQL Server to an Amazon RDS instance.
 
-Deployment of this template will create two separate "environments". The first, an Amazon EC2 instance running an MS SQL 
+Deployment of this template will create two separate "environments". The first, an Amazon EC2 instance running an MS SQL
 Server represents an on-premises environment and is therefore the *source* while the second environment, an Amazon RDS SQL Server instance is the *target* for the migration.
 
 The database is migrated using AWS DMS. It continuously synchronises changes in the "on-premises" instance with the cloud RDS instance.
 
 #### Summary
 
-This sample will deploy the two SQL Server instances (one EC2 and one Amazon RDS) in their own VPCs. 
-The SQL Server running in the EC2 instance represents the on-premises infrastructure and the Amazon RDS instance represents, 
-then create a sample database in both. No tables will be created at this point - creating of tables inside the database is left to the user. 
+This sample will deploy the two SQL Server instances (one EC2 and one Amazon RDS) in their own VPCs.
+The SQL Server running in the EC2 instance represents the on-premises infrastructure and the Amazon RDS instance represents,
+then create a sample database in both. No tables will be created at this point - creating of tables inside the database is left to the user.
 A DMS migration task will also be created. Upon starting that task (eg; using console or aws cli), tables in the database will be continually replicated across from the EC2 instance to the Amazon RDS instance.
 
 ### Architecture
@@ -50,16 +50,16 @@ An overview of the architecture is below:
 
 #### Prerequisites
 
-To deploy the solution, you will require an AWS account. If you don’t already have an AWS account, 
-create one at <https://aws.amazon.com> by following the on-screen instructions. 
+To deploy the solution, you will require an AWS account. If you don’t already have an AWS account,
+create one at <https://aws.amazon.com> by following the on-screen instructions.
 Your access to the AWS account must have IAM permissions to launch AWS CloudFormation templates that create IAM roles.
 
 #### Deployment
 
 The application is deployed as an [AWS CloudFormation](https://aws.amazon.com/cloudformation) template.
 
-> **Note**  
-You are responsible for the cost of the AWS services used while running this sample deployment. There is no additional 
+> **Note**
+You are responsible for the cost of the AWS services used while running this sample deployment. There is no additional
 >cost for using this sample. For full details, see the pricing pages for each AWS service you will be using in this sample. Prices are subject to change.
 
 1. Deploy the latest CloudFormation template by following the link below for your preferred AWS region:
@@ -74,7 +74,7 @@ You are responsible for the cost of the AWS services used while running this sam
 |**AP (Sydney)** (ap-southeast-2) | [![Launch the Amazon DMS Data Replication Demo Stack with CloudFormation](docs/deploy-to-aws.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-southeast-2#/stacks/new?stackName=aws-dms-sql-server&templateURL=https://s3.amazonaws.com/solution-builders-ap-southeast-2/aws-dms-sql-server/latest/main.template)|
 
 2. If prompted, login using your AWS account credentials.
-1. You should see a screen titled "*Create Stack*" at the "*Specify template*" step. The fields specifying the CloudFormation 
+1. You should see a screen titled "*Create Stack*" at the "*Specify template*" step. The fields specifying the CloudFormation
 template are pre-populated. Click the *Next* button at the bottom of the page.
 1. On the "*Specify stack details*" screen you may customize the following parameters of the CloudFormation stack:
 
@@ -95,12 +95,12 @@ template are pre-populated. Click the *Next* button at the bottom of the page.
    When completed, click *Next*
 1. [Configure stack options](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-console-add-tags.html) if desired, then click *Next*.
 1. On the review you screen, you must check the boxes for:
-   * "*I acknowledge that AWS CloudFormation might create IAM resources*" 
+   * "*I acknowledge that AWS CloudFormation might create IAM resources*"
    * "*I acknowledge that AWS CloudFormation might create IAM resources with custom names*"
    * "*I acknowledge that AWS CloudFormation might require the following capability: CAPABILITY_AUTO_EXPAND*"
 
    These are required to allow CloudFormation to create a Role to allow access to resources needed by the stack and name the resources in a dynamic way.
-1. Click *Create Stack* 
+1. Click *Create Stack*
 1. Wait for the CloudFormation stack to launch. Completion is indicated when the "Stack status" is "*CREATE_COMPLETE*".
    * You can monitor the stack creation progress in the "Events" tab.
 1. Note the *EC2SQLServerEip* and *RDSSQLEndpoint* displayed in the *Outputs* tab of the main stack. This can be used to access the EC2 host and RDS instance.

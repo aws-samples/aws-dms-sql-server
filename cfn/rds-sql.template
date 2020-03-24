@@ -37,13 +37,13 @@ Resources:
     Type: AWS::RDS::DBInstance
     Properties:
       AllocatedStorage: '20'
-      BackupRetentionPeriod: '0'
+      BackupRetentionPeriod: 0
       DBInstanceClass: !Ref DbInstanceclass
       DBSubnetGroupName: !Ref SubnetGroup
       Engine: !Ref Engine
       EngineVersion: !Ref EngineVersion
       LicenseModel: license-included
-      MasterUserPassword: !Ref DBPassword
+      MasterUserPassword: !Ref DBPassword # pragma: allowlist secret
       MasterUsername: !Ref DBUsername
       MultiAZ: false
       PubliclyAccessible: true
@@ -55,7 +55,7 @@ Resources:
   RDSSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: !Sub "Security Group for RDS Instance"
+      GroupDescription: Security Group for RDS Instance
       VpcId: !Ref VPC
       Tags:
         - Key: Name
