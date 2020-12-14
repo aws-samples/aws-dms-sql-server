@@ -246,7 +246,7 @@ Resources:
       - DMSIAMRoles
       - VPCPeering
     Properties:
-      TemplateURL: cfn/dms.template
+      TemplateURL: dms.template
       TimeoutInMinutes: 20
       Parameters:
         VPC: !GetAtt VPCNetwork1.Outputs.VpcID
