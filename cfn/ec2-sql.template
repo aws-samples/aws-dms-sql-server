@@ -1,4 +1,5 @@
-AWSTemplateFormatVersion: 2010-09-09
+AWSTemplateFormatVersion: "2010-09-09"
+
 Description: Provides configuration for a Microsoft SQL instance.
 
 Parameters:
@@ -37,8 +38,7 @@ Parameters:
     ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/0-32
 
   MSSQLVersion:
-    Description: MSSQL Server version. This is used to Change Auth mode from Windows only to SQL and Windows Auth
-      For MSSQL server 2017 use number 14, for MSSQL server 2016 use number 13
+    Description: MSSQL Server version. This is used to Change Auth mode from Windows only to SQL and Windows Auth For MSSQL server 2017 use number 14, for MSSQL server 2016 use number 13
     Type: Number
 
 Resources:
@@ -88,6 +88,10 @@ Resources:
       InstanceId: !Ref WindowsSQLInstance
 
   WindowsSQLInstance:
+    CreationPolicy:
+      ResourceSignal:
+        Count: 1
+        Timeout: PT30M
     Type: AWS::EC2::Instance
     Metadata:
       AWS::CloudFormation::Init:
@@ -264,17 +268,12 @@ Resources:
       Tags:
         - Key: Name
           Value: windows-sql-server
-      UserData:
-        Fn::Base64: !Sub |
+      UserData: !Base64
+        Fn::Sub: |
           <script>
           cfn-init.exe -v --stack ${AWS::StackName} --resource WindowsSQLInstance --region ${AWS::Region}
           cfn-signal.exe -e %errorlevel% --stack ${AWS::StackName} --resource WindowsSQLInstance --region ${AWS::Region}
           </script>
-
-    CreationPolicy:
-      ResourceSignal:
-        Count: 1
-        Timeout: 'PT30M'
 
 Outputs:
   WindowsSQLInstance:

@@ -1,0 +1,68 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+
+repos:
+  # General
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.2.0
+    hooks:
+      - id: check-case-conflict
+      - id: detect-private-key
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+        args:
+          - --fix=lf
+      - id: check-yaml
+      - id: pretty-format-json
+        args:
+          - --autofix
+          - --indent=2
+          - --no-sort-keys
+        exclude: /package-lock\.json$
+      - id: check-added-large-files
+        args:
+          - --maxkb=1000
+      - id: check-merge-conflict
+
+  # Secrets
+  - repo: https://github.com/awslabs/git-secrets
+    rev: 80230afa8c8bdeac766a0fece36f95ffaa0be778
+    hooks:
+      - id: git-secrets
+        entry: git-secrets --scan
+        files: "."
+
+  # CloudFormation
+  - repo: https://github.com/aws-cloudformation/cfn-python-lint
+    rev: v0.37.1
+    hooks:
+      - id: cfn-python-lint
+        name: AWS CloudFormation Linter
+        files: \.(template)$
+        args: [--ignore-checks=W4002]
+
+  # The bug creates circular checks with end-of-file-fixer.
+  - repo: https://github.com/aws-cloudformation/rain
+    rev: 46a8f63541d848c8b57c129babdd124f324fdd78
+    hooks:
+      - id: cfn-format
+        files: \.template$
+
+  # Python
+  - repo: https://github.com/pycqa/pylint
+    rev: pylint-2.6.0
+    hooks:
+      - id: pylint
+        args:
+          - --errors-only
+
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.5.4
+    hooks:
+      - id: isort
+
+  - repo: https://github.com/psf/black
+    rev: stable
+    hooks:
+      - id: black
