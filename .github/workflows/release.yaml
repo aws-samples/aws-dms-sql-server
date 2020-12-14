@@ -42,7 +42,7 @@ jobs:
         with:
           tag_name: v${{ env.THIS_VERSION }}
           release_name: Release v${{ env.THIS_VERSION }}
-          body: |
-            See the CHANGELOG for a list of features included in this release
+          body: |-
+            ${{ github.event.head_commit.message }}
           draft: false
           prerelease: false
