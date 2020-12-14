@@ -1,6 +1,7 @@
-[![Build Status](https://travis-ci.org/aws-samples/aws-dms-sql-server.svg?branch=master)](https://travis-ci.org/aws-samples/aws-dms-sql-server)
-
 ## MS SQL Server - AWS Database Migration Service (DMS) Replication Demo
+
+[![Build Status](https://github.com/aws-samples/aws-dms-sql-server/workflows/Publish%20Version/badge.svg)](https://github.com/aws-samples/aws-dms-sql-server/actions)
+
 
 #### Database migration from a simulated on-premises MS SQL Server to an Amazon RDS instance in AWS Cloud
 
