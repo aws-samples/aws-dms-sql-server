@@ -113,6 +113,9 @@ template are pre-populated. Click the *Next* button at the bottom of the page.
 ### Limitations
 - MSSQL server 2017 doesnt support continues replication. The solution is using MSSQL server 2016 by default.
 
+## Local Development
+See [Local Development](docs/LOCAL_DEVELOPMENT.md) guide to get a copy of the project up and running on your local machine for development and testing purposes.
+
 ### Clean up
 
 To remove the stack:
