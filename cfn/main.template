@@ -3,7 +3,7 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: Creates AWS infrastructure to deploy DMS solution. (uksb-1ppahhhui)
 
 Metadata:
-  Version: 0.1.4
+  Version: 0.1.5
 
   AWS::CloudFormation::Interface:
     ParameterGroups:
