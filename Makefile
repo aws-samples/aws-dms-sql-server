@@ -34,8 +34,8 @@ deploy: package
 	  --region $(AWS_REGION) \
 	  --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
 	  --parameter-overrides \
-	  AvailabilityZones=${REGION}a,${REGION}b \
-	  UserPassword=${USER_PASSWORD}
+	  AvailabilityZones=$(AWS_REGION)a,$(AWS_REGION)b \
+	  UserPassword=$(USER_PASSWORD)
 
 package: build
 	@printf "\n--> Packaging and uploading templates to the %s S3 bucket ...\n" $(BUCKET_NAME)
