@@ -4,8 +4,8 @@ Description: RDS SQL server stack.
 
 Parameters:
   Subnets:
-    Type: List<AWS::EC2::Subnet::Id>
     Description: List of subnet IDs
+    Type: List<AWS::EC2::Subnet::Id>
 
   DBUsername:
     Type: String
@@ -15,8 +15,8 @@ Parameters:
     NoEcho: true
 
   VPC:
-    Type: String
     Description: ID Of the OnPrem VPC
+    Type: String
 
   OnPremCidr:
     Type: String
@@ -36,7 +36,7 @@ Resources:
   DB:
     Type: AWS::RDS::DBInstance
     Properties:
-      AllocatedStorage: '20'
+      AllocatedStorage: "20"
       BackupRetentionPeriod: 0
       DBInstanceClass: !Ref DbInstanceclass
       DBSubnetGroupName: !Ref SubnetGroup

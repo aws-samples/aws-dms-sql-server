@@ -21,8 +21,8 @@ Parameters:
     Type: String
 
   Subnets:
-    Type: List<AWS::EC2::Subnet::Id>
     Description: List of subnet IDs
+    Type: List<AWS::EC2::Subnet::Id>
 
   WindowsSQLSecurityGroup:
     Description: WindowsSQL Security Group ID.
@@ -83,7 +83,7 @@ Resources:
       MigrationType: full-load-and-cdc
       ReplicationInstanceArn: !Ref ReplicationInstance
       SourceEndpointArn: !Ref SourceEndpoint
-      TableMappings: "{\"rules\": [{\"rule-type\": \"selection\", \"rule-id\": \"1\", \"rule-action\": \"include\", \"object-locator\": {\"schema-name\": \"%\", \"table-name\": \"%\"}, \"rule-name\": \"1\"}]}"
+      TableMappings: '{"rules": [{"rule-type": "selection", "rule-id": "1", "rule-action": "include", "object-locator": {"schema-name": "%", "table-name": "%"}, "rule-name": "1"}]}'
       TargetEndpointArn: !Ref TargetEndpoint
 
   SourceEndpoint:

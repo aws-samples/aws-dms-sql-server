@@ -58,21 +58,17 @@ Resources:
   VPCPublicSubnet1RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId:
-        Ref: VPCPublicSubnet1RouteTable
-      SubnetId:
-        Ref: VPCPublicSubnet1
+      RouteTableId: !Ref VPCPublicSubnet1RouteTable
+      SubnetId: !Ref VPCPublicSubnet1
 
   VPCPublicSubnet1DefaultRoute:
     Type: AWS::EC2::Route
-    Properties:
-      RouteTableId:
-        Ref: VPCPublicSubnet1RouteTable
-      DestinationCidrBlock: 0.0.0.0/0
-      GatewayId:
-        Ref: VPCIGW
     DependsOn:
       - VPCGW
+    Properties:
+      RouteTableId: !Ref VPCPublicSubnet1RouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref VPCIGW
 
   VPCPublicSubnet2:
     Type: AWS::EC2::Subnet
@@ -98,19 +94,17 @@ Resources:
   VPCPublicSubnet2RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId:
-        Ref: VPCPublicSubnet2RouteTable
-      SubnetId:
-        Ref: VPCPublicSubnet2
+      RouteTableId: !Ref VPCPublicSubnet2RouteTable
+      SubnetId: !Ref VPCPublicSubnet2
 
   VPCPublicSubnet2DefaultRoute:
     Type: AWS::EC2::Route
+    DependsOn:
+      - VPCGW
     Properties:
       RouteTableId: !Ref VPCPublicSubnet2RouteTable
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref VPCIGW
-    DependsOn:
-      - VPCGW
 
   VPCIGW:
     Type: AWS::EC2::InternetGateway
@@ -122,17 +116,16 @@ Resources:
   VPCGW:
     Type: AWS::EC2::VPCGatewayAttachment
     Properties:
-      VpcId:
-        Ref: VPC
-      InternetGatewayId:
-        Ref: VPCIGW
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref VPCIGW
 
   # -- Create FlowLogs and CloudWatch Logs Group including Service Role policy. -- #
+
   VpcFlowLogsRole:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
-        Version: 2012-10-17
+        Version: "2012-10-17"
         Statement:
           - Sid: AllowFlowLogs
             Effect: Allow
@@ -143,7 +136,7 @@ Resources:
       Policies:
         - PolicyName: cloudwatchlogsrole
           PolicyDocument:
-            Version: 2012-10-17
+            Version: "2012-10-17"
             Statement:
               - Action:
                   - logs:CreateLogGroup
