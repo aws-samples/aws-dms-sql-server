@@ -1,2 +1,2 @@
-boto3==1.9.237
-crhelper==2.0.4
+boto3
+crhelper
