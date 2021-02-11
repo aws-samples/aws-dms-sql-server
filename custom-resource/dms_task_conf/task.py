@@ -57,8 +57,8 @@ def _create(replication_task_arn):
 
 def _describe(replication_task_arn):
     try:
-        describe_replication_tasks = client.describe_replication_task(
-            Filters=[{"Name": "replication-task-arn", "Value": [replication_task_arn]}]
+        describe_replication_tasks = client.describe_replication_tasks(
+            Filters=[{"Name": "replication-task-arn", "Values": [replication_task_arn]}]
         )
         return describe_replication_tasks["ReplicationTasks"][0]["Status"]
 

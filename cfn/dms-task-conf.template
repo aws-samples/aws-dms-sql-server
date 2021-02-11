@@ -43,7 +43,7 @@ Resources:
       ServiceToken: !GetAtt DmsTaskConfFunction.Arn
       ReplicationInstanceArn: !Ref ReplicationInstanceArn
       ReplicationTaskArn: !Ref ReplicationTaskArn
-    Version: 1.0
+    Version: 1.1
 
 Outputs:
   DmsTaskConfFunction:
