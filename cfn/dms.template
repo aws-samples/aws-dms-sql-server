@@ -32,6 +32,9 @@ Parameters:
     Description: RDS Security Group ID.
     Type: AWS::EC2::SecurityGroup::Id
 
+  DMSInstanceClass:
+    Type: String
+
 Resources:
   DMSSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -72,7 +75,7 @@ Resources:
     Type: AWS::DMS::ReplicationInstance
     Properties:
       PubliclyAccessible: false
-      ReplicationInstanceClass: dms.t2.large
+      ReplicationInstanceClass: !Ref DMSInstanceClass
       ReplicationSubnetGroupIdentifier: !Ref ReplicationSubnetGroup
       VpcSecurityGroupIds:
         - !Ref DMSSecurityGroup

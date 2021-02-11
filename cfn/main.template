@@ -3,7 +3,7 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: Creates AWS infrastructure to deploy DMS solution. (uksb-1ppahhhui)
 
 Metadata:
-  Version: 1.5.4
+  Version: 1.5.5
 
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -12,6 +12,10 @@ Metadata:
         Parameters:
           - AvailabilityZones
           - OnPremCidr
+      - Label:
+          default: AWS DMS configuration
+        Parameters:
+          - DMSInstanceClass
       - Label:
           default: EC2 SQL instance configuration
         Parameters:
@@ -35,6 +39,8 @@ Metadata:
         default: Availability Zones
       OnPremCidr:
         default: On premise CIDR IP
+      DMSInstanceClass:
+        default: DMS instance class
       WindowsSQLInstanceType:
         default: EC2 instance type
       WindowsSQLAMI:
@@ -66,6 +72,11 @@ Parameters:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
     ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/0-32
 
+  DMSInstanceClass:
+    Description: Instance class of DMS instance
+    Type: String
+    Default: dms.t3.large
+
   WindowsSQLAMI:
     Description: The latest Windows server 2019 with SQL 2016 Standard AMI
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
@@ -74,9 +85,6 @@ Parameters:
   WindowsSQLInstanceType:
     Description: The instance type for MS SQL server.
     Type: String
-    AllowedValues:
-      - t3.2xlarge
-      - m5.2xlarge
     Default: m5.2xlarge
 
   MSSQLVersion:
@@ -110,13 +118,6 @@ Parameters:
   DbInstanceclass:
     Description: Instance class of RDS instance
     Type: String
-    AllowedValues:
-      - db.m4.large
-      - db.m4.16xlarge
-      - db.r4.large
-      - db.r4.16xlarge
-      - db.m5.large
-      - db.m5.24xlarge
     Default: db.m5.large
 
   Engine:
@@ -144,8 +145,6 @@ Mappings:
       VPCName: AWSCloudVPC
       PublicSubnet1Cidr: 10.1.0.0/24
       PublicSubnet2Cidr: 10.1.1.0/24
-
-Transform: AWS::Serverless-2016-10-31
 
 Resources:
   DMSIAMRoles:
@@ -258,6 +257,7 @@ Resources:
         Username: !Ref Username
         WindowsSQLSecurityGroup: !GetAtt EC2SQL.Outputs.WindowsSQLSecurityGroup
         RDSSecurityGroup: !GetAtt RDSSQL.Outputs.RDSSecurityGroup
+        DMSInstanceClass: !Ref DMSInstanceClass
 
   DmsTaskConf:
     Type: AWS::CloudFormation::Stack
