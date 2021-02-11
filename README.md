@@ -30,10 +30,10 @@ The database is migrated using AWS DMS. It continuously synchronises changes in 
 
 #### Summary
 
-This sample will deploy the two SQL Server instances (one EC2 and one Amazon RDS) in their own VPCs.
-The SQL Server running in the EC2 instance represents the on-premises infrastructure and the Amazon RDS instance represents,
-then create a sample database in both. No tables will be created at this point - creating of tables inside the database is left to the user.
-A DMS migration task will also be created. Upon starting that task (eg; using console or aws cli), tables in the database will be continually replicated across from the EC2 instance to the Amazon RDS instance.
+This sample will deploy two SQL Server instances, one on EC2 and one on Amazon RDS, in their own VPCs.
+The SQL Server running on the EC2 instance represents the on-premises infrastructure, and the Amazon RDS instance represents AWS cloud.
+No tables will be created at this point - creating of tables inside the database is left to the user.
+AWS DMS migration task will also be created. Upon starting that task (eg; using console or aws cli), tables in the database will be continually replicated across from the EC2 instance to the Amazon RDS instance.
 
 ### Architecture
 
@@ -83,6 +83,7 @@ template are pre-populated. Click the *Next* button at the bottom of the page.
 |---------------|-------|-----------|
 |Availability Zones|Requires input|The list of Availability Zones to use for the subnets in the VPCs. *Use two AZs*.|
 |On premise CIDR IP|Requires input|The CIDR Allowed RDP and SQL access to the EC2 and RDS host. CIDR block parameter must be in the form x.x.x.x/0-32.|
+|DMSInstanceClass|dms.t3.large|Instance class of DMS instance.|
 |EC2 instance type|m5.2xlarge|The EC2 instance type for Microsoft SQL server.|
 |Windows server AMI|/aws/service/ami-windows-latest/Windows_Server-2019-English-Full-SQL_2016_SP2_Standard|Query for the Latest Windows AMI Using Systems Manager Parameter Store https://aws.amazon.com/blogs/mt/query-for-the-latest-windows-ami-using-systems-manager-parameter-store/|
 |MSSQL Server version|13|MSSQL Server version. This is used to Change Auth mode from Windows only to SQL and Windows Auth. For MSSQL server 2017 use number 14, for MSSQL server 2016 use number 13.|
@@ -111,7 +112,7 @@ template are pre-populated. Click the *Next* button at the bottom of the page.
 [Database guide](docs/database/README.md)
 
 ### Limitations
-- MSSQL server 2017 doesnt support continues replication. The solution is using MSSQL server 2016 by default.
+- MSSQL server 2017 doesn't support continues replication. The solution is using MSSQL server 2016 by default.
 
 ## Local Development
 See [Local Development](docs/LOCAL_DEVELOPMENT.md) guide to get a copy of the project up and running on your local machine for development and testing purposes.
@@ -123,7 +124,7 @@ To remove the stack:
 1. Open the AWS CloudFormation Console
 1. Click the *aws-dms-sql-server* project, right-click and select "*Delete Stack*"
 1. Your stack will take some time to be deleted. You can track its progress in the "Events" tab.
-1. When it is done, the status will change from DELETE_IN_PROGRESS" to "DELETE_COMPLETE". It will then disappear from the list.
+1. When it is done, the status will change from "DELETE_IN_PROGRESS" to "DELETE_COMPLETE". It will then disappear from the list.
 
 ## Contributing
 
