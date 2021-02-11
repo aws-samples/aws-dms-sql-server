@@ -260,6 +260,8 @@ Resources:
           Ebs:
             VolumeSize: 100
             VolumeType: gp2
+            Encrypted: true
+            DeleteOnTermination: true
       ImageId: !Ref WindowsSQLAMI
       InstanceType: !Ref WindowsSQLInstanceType
       SecurityGroupIds:

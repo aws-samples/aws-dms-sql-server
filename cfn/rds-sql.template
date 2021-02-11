@@ -47,7 +47,7 @@ Resources:
       MasterUsername: !Ref DBUsername
       MultiAZ: false
       PubliclyAccessible: true
-      StorageEncrypted: false
+      StorageEncrypted: true
       StorageType: gp2
       VPCSecurityGroups:
         - !GetAtt RDSSecurityGroup.GroupId
