@@ -72,7 +72,7 @@ Resources:
     Type: AWS::DMS::ReplicationInstance
     Properties:
       PubliclyAccessible: false
-      ReplicationInstanceClass: dms.t2.large
+      ReplicationInstanceClass: dms.t3.large
       ReplicationSubnetGroupIdentifier: !Ref ReplicationSubnetGroup
       VpcSecurityGroupIds:
         - !Ref DMSSecurityGroup
