@@ -3,16 +3,9 @@ SHELL := /bin/bash
 .PHONY : help init deploy test clean delete
 .DEFAULT: help
 
-# Check for .custom.mk file if exists
+VENV_NAME ?= venv
+PYTHON ?= $(VENV_NAME)/bin/python
 CUSTOM_FILE ?= .custom.mk
-CUSTOM_EXAMPLE ?= .custom.mk.example
-ifneq ("$(wildcard $(CUSTOM_FILE))","")
-	include $(CUSTOM_FILE)
-else ifneq ("$(wildcard $(CUSTOM_EXAMPLE))","")
-	include $(CUSTOM_EXAMPLE)
-else
-$(error File `.custom.mk` doesnt exist, please create one.)
-endif
 
 help:
 	@echo "init 		generate project for local development"
@@ -21,14 +14,35 @@ help:
 	@echo "clean 		delete virtualenv and installed libraries"
 	@echo "delete 		delete deployed stacks"
 
-# Install local dependencies and git hooks
-init: venv
-	venv/bin/pre-commit install
-	make build
+# Initialize VirtualEnv
+.PHONY: $(VENV_NAME)
+init: $(VENV_NAME)
+
+$(VENV_NAME): pre-commit
+
+$(VENV_NAME)/bin/activate: requirements.txt
+	test -d $(VENV_NAME) || virtualenv -p python3 $(VENV_NAME)
+	$(PYTHON) -m pip install -U pip
+	$(PYTHON) -m pip install -Ur requirements.txt
+	touch $(VENV_NAME)/bin/activate
+
+pre-commit: $(VENV_NAME)/bin/activate
+	$(VENV_NAME)/bin/pre-commit install
+
+.PHONY: config package build
+config: $(CUSTOM_FILE)
+	@echo "Configuration completed."
+
+$(CUSTOM_FILE):
+ifneq ("$(wildcard $(CUSTOM_FILE))","")
+	@echo "File $(CUSTOM_FILE) already exists. Change configuration manually in `./custom.mk` file if required."
+endif
+
+include $(CUSTOM_FILE)
 
 deploy: package
 	@printf "\n--> Deploying %s template...\n" $(STACK_NAME)
-	@aws cloudformation deploy \
+	@$(VENV_NAME)/bin/aws cloudformation deploy \
 	  --template-file ./cfn/packaged.template \
 	  --stack-name $(STACK_NAME) \
 	  --region $(AWS_REGION) \
@@ -39,7 +53,7 @@ deploy: package
 
 package: build
 	@printf "\n--> Packaging and uploading templates to the %s S3 bucket ...\n" $(BUCKET_NAME)
-	@aws cloudformation package \
+	@$(VENV_NAME)/bin/aws cloudformation package \
   	--template-file ./cfn/main.template \
   	--s3-bucket $(BUCKET_NAME) \
   	--s3-prefix $(STACK_NAME) \
@@ -49,23 +63,15 @@ package: build
 build:
 	@for fn in custom-resource/*; do \
   		printf "\n--> Installing %s requirements...\n" $${fn}; \
-  		pip install -r $${fn}/requirements.txt --target $${fn} --upgrade; \
+  		$(VENV_NAME)/bin/pip install -r $${fn}/requirements.txt --target $${fn} --upgrade; \
   	done
 
 # Package for cfn-publish CI
 cfn-publish-package: build
 	zip -r packaged.zip -@ < ci/include.lst
 
-# virtualenv setup
-venv: venv/bin/activate
-
-venv/bin/activate: requirements.txt
-	test -d venv || virtualenv venv
-	. venv/bin/activate; pip install -Ur requirements.txt
-	touch venv/bin/activate
-
-test:
-	pre-commit run --all-files
+test: $(VENV_NAME)
+	$(VENV_NAME)/bin/pre-commit run --show-diff-on-failure --color=always --all-files
 
 version:
 	@bumpversion --dry-run --list cfn/main.template | grep current_version | sed s/'^.*='//
@@ -77,6 +83,6 @@ clean:
 
 delete:
 	@printf "\n--> Deleting %s stack...\n" $(STACK_NAME)
-	@aws cloudformation delete-stack \
+	@$(VENV_NAME)/bin/aws cloudformation delete-stack \
             --stack-name $(STACK_NAME)
 	@printf "\n--> $(STACK_NAME) deletion has been submitted, check AWS CloudFormation Console for an update..."

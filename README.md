@@ -85,11 +85,11 @@ template are pre-populated. Click the *Next* button at the bottom of the page.
 |On premise CIDR IP|Requires input|The CIDR Allowed RDP and SQL access to the EC2 and RDS host. CIDR block parameter must be in the form x.x.x.x/0-32.|
 |DMSInstanceClass|dms.t3.large|Instance class of DMS instance.|
 |EC2 instance type|m5.2xlarge|The EC2 instance type for Microsoft SQL server.|
-|Windows server AMI|/aws/service/ami-windows-latest/Windows_Server-2019-English-Full-SQL_2016_SP2_Standard|Query for the Latest Windows AMI Using Systems Manager Parameter Store https://aws.amazon.com/blogs/mt/query-for-the-latest-windows-ami-using-systems-manager-parameter-store/|
+|Windows server AMI|/aws/service/ami-windows-latest/Windows_Server-2019-English-Full-SQL_2016_SP3_Standard|Query for the Latest Windows AMI Using Systems Manager Parameter Store https://aws.amazon.com/blogs/mt/query-for-the-latest-windows-ami-using-systems-manager-parameter-store/|
 |MSSQL Server version|13|MSSQL Server version. This is used to Change Auth mode from Windows only to SQL and Windows Auth. For MSSQL server 2017 use number 14, for MSSQL server 2016 use number 13.|
 |RDS instance type|db.m5.large|Instance class of RDS instance.|
 |Database engine type|sqlserver-se|MS SQL engine type. The Enterprise, Standard, Workgroup, and Developer editions are supported. The Web and Express editions aren't supported by AWS DMS.|
-|Database engine version|13.00.5216.0.v1|SQL Server 2016 SP2 (CU3) engine version13.00.5216.0, for all editions and all AWS Regions.|
+|Database engine version|13.00.6435.0.v1|SQL Server 2016 SP2 (CU3) engine version13.00.5216.0, for all editions and all AWS Regions.|
 |Windows server and database username|dms_user|The database and instance admin account. Minimum 5 characters must begin with a letter and contain only alphanumeric or "_".|
 |Windows server and database password|Requires input|The password for instance user account. Minimum 8 characters, at least one of each of the following; uppercase, lowercase, number, and symbol character such as !@#$%^&*()<>[]{}|_+-=.|
 |Database name|dms_sample|Database name.|

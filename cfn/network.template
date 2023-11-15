@@ -120,7 +120,6 @@ Resources:
       InternetGatewayId: !Ref VPCIGW
 
   # -- Create FlowLogs and CloudWatch Logs Group including Service Role policy. -- #
-
   VpcFlowLogsRole:
     Type: AWS::IAM::Role
     Properties:
@@ -148,6 +147,8 @@ Resources:
                 Resource: '*'
 
   VpcFlowLogGroup:
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
     Type: AWS::Logs::LogGroup
     Properties:
       RetentionInDays: 90

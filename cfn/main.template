@@ -3,7 +3,7 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: Creates AWS infrastructure to deploy DMS solution. (uksb-1ppahhhui)
 
 Metadata:
-  Version: 1.5.7
+  Version: 1.6.0
 
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -80,7 +80,7 @@ Parameters:
   WindowsSQLAMI:
     Description: The latest Windows server 2019 with SQL 2016 Standard AMI
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
-    Default: /aws/service/ami-windows-latest/Windows_Server-2019-English-Full-SQL_2016_SP2_Standard
+    Default: /aws/service/ami-windows-latest/Windows_Server-2019-English-Full-SQL_2016_SP3_Standard
 
   WindowsSQLInstanceType:
     Description: The instance type for MS SQL server.
@@ -131,7 +131,7 @@ Parameters:
   EngineVersion:
     Description: MS SQL Engine version
     Type: String
-    Default: 13.00.5216.0.v1
+    Default: 13.00.6435.0.v1
 
 Mappings:
   Networks:

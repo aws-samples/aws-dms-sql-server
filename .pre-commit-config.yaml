@@ -2,66 +2,61 @@
 # See https://pre-commit.com/hooks.html for more hooks
 
 repos:
-  # General
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.4.0
-    hooks:
-      - id: check-case-conflict
-      - id: detect-private-key
-      - id: trailing-whitespace
-      - id: end-of-file-fixer
-      - id: mixed-line-ending
-        args:
-          - --fix=lf
-      - id: check-yaml
-      - id: pretty-format-json
-        args:
-          - --autofix
-          - --indent=2
-          - --no-sort-keys
-        exclude: /package-lock\.json$
-      - id: check-added-large-files
-        args:
-          - --maxkb=1000
-      - id: check-merge-conflict
 
-  # Secrets
-  - repo: https://github.com/awslabs/git-secrets
-    rev: 80230afa8c8bdeac766a0fece36f95ffaa0be778
-    hooks:
-      - id: git-secrets
-        entry: git-secrets --scan
-        files: "."
+# General
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.5.0
+  hooks:
+  - id: check-case-conflict
+  - id: detect-private-key
+  - id: trailing-whitespace
+  - id: end-of-file-fixer
+  - id: mixed-line-ending
+    args:
+      - --fix=lf
+    exclude: /package-lock\.json$
+  - id: check-added-large-files
+    args:
+      - --maxkb=1000
+  - id: check-merge-conflict
 
-  # CloudFormation
-  - repo: https://github.com/aws-cloudformation/cfn-python-lint
-    rev: v0.44.7
-    hooks:
-      - id: cfn-python-lint
-        name: AWS CloudFormation Linter
-        files: \.(template)$
-        args: [--ignore-checks=W4002]
+# Secrets
+- repo: https://github.com/awslabs/git-secrets
+  rev: 80230afa8c8bdeac766a0fece36f95ffaa0be778
+  hooks:
+  - id: git-secrets
+    entry: git-secrets --scan
+    files: .
 
-  - repo: https://github.com/aws-cloudformation/rain
-    rev: v1.1.1
-    hooks:
-      - id: cfn-format
-        files: \.template$
+# CloudFormation
+- repo: https://github.com/aws-cloudformation/cfn-lint
+  rev: v0.83.2
+  hooks:
+  - id: cfn-lint-rc
+    files: cfn/.*\.(ya?ml|template)$
 
-  # Python
-  - repo: https://github.com/pycqa/pylint
-    rev: pylint-2.6.0
-    hooks:
-      - id: pylint
-        args:
-          - --errors-only
+- repo: https://github.com/aws-cloudformation/rain
+  rev: v1.6.0
+  hooks:
+  - id: cfn-format
+    files: cfn/.*\.(ya?ml|template)$
 
-  - repo: https://github.com/PyCQA/isort
-    rev: 5.7.0
-    hooks:
-      - id: isort
+    # Python
+- repo: https://github.com/pycqa/pylint
+  rev: v3.0.1
+  hooks:
+    - id: pylint
+      args:
+        - --errors-only
+        - --disable=E0401
 
-  - repo: https://github.com/psf/black
-    rev: 20.8b1
-    hooks:
-      - id: black
+- repo: https://github.com/psf/black
+  rev: 23.11.0
+  hooks:
+    - id: black
+
+- repo: https://github.com/PyCQA/isort
+  rev: 5.12.0
+  hooks:
+    - id: isort
+      args: ["--profile", "black"]
