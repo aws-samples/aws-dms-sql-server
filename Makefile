@@ -63,7 +63,7 @@ package: build
 build:
 	@for fn in custom-resource/*; do \
   		printf "\n--> Installing %s requirements...\n" $${fn}; \
-  		$(VENV_NAME)/bin/pip install -r $${fn}/requirements.txt --target $${fn} --upgrade; \
+  		pip install -r $${fn}/requirements.txt --target $${fn} --upgrade; \
   	done
 
 # Package for cfn-publish CI
