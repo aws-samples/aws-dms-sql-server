@@ -34,6 +34,8 @@ Parameters:
 
 Resources:
   DB:
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
     Type: AWS::RDS::DBInstance
     Properties:
       AllocatedStorage: "20"

@@ -147,6 +147,8 @@ Resources:
                 Resource: '*'
 
   VpcFlowLogGroup:
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
     Type: AWS::Logs::LogGroup
     Properties:
       RetentionInDays: 90
