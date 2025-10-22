@@ -10,7 +10,7 @@ Resources:
     Properties:
       CodeUri: ../custom-resource/dms_iam_roles/
       Handler: iam.handler
-      Runtime: python3.7
+      Runtime: python3.12
       Timeout: 30
       Policies:
         - Version: "2012-10-17"
