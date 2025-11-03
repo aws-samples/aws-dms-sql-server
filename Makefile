@@ -3,7 +3,7 @@ SHELL := /bin/bash
 .PHONY : help init deploy test clean delete
 .DEFAULT: help
 
-VENV_NAME ?= venv
+VENV_NAME ?= .venv
 PYTHON ?= $(VENV_NAME)/bin/python
 CUSTOM_FILE ?= .custom.mk
 
@@ -27,7 +27,7 @@ $(VENV_NAME)/bin/activate: requirements.txt
 	touch $(VENV_NAME)/bin/activate
 
 pre-commit: $(VENV_NAME)/bin/activate
-	$(VENV_NAME)/bin/pre-commit install
+	GIT_CONFIG=/dev/null $(VENV_NAME)/bin/pre-commit install
 
 .PHONY: config package build
 config: $(CUSTOM_FILE)
@@ -71,7 +71,7 @@ build:
 cfn-publish-package: build
 	zip -r packaged.zip -@ < ci/include.lst
 
-test: $(VENV_NAME)
+test:
 	$(VENV_NAME)/bin/pre-commit run --show-diff-on-failure --color=always --all-files
 
 version:
@@ -79,7 +79,7 @@ version:
 
 # Cleanup local build
 clean:
-	rm -rf venv
+	rm -rf $(VENV_NAME)
 	find . -iname "*.pyc" -delete
 
 delete:

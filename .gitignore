@@ -6,7 +6,7 @@ deploy.sh
 .DS_Store
 /.custom.mk
 /cfn/packaged.template
-venv
+.venv
 
 # Ignore all the libraries installed via pip
 custom-resource/dms_iam_roles/*

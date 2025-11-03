@@ -91,7 +91,7 @@ Resources:
   SubnetGroup:
     Type: AWS::RDS::DBSubnetGroup
     Properties:
-      DBSubnetGroupDescription: !Sub "Subnet group for ${AWS::StackName} SQL server"
+      DBSubnetGroupDescription: !Sub Subnet group for ${AWS::StackName} SQL server
       SubnetIds: !Ref Subnets
 
 Outputs:

@@ -275,7 +275,9 @@ Resources:
       InstanceType: !Ref WindowsSQLInstanceType
       SecurityGroupIds:
         - !Ref WindowsSQLSecurityGroup
-      SubnetId: !Select [0, !Ref PublicSubnets]
+      SubnetId: !Select
+        - 0
+        - !Ref PublicSubnets
       Tags:
         - Key: Name
           Value: windows-sql-server
@@ -285,17 +287,17 @@ Resources:
           # Enable detailed logging
           $ErrorActionPreference = "Continue"
           $logFile = "C:\cfn-init.log"
-          
+
           # Log start
           "Starting cfn-init at $(Get-Date)" | Out-File -FilePath $logFile -Append
-          
+
           # Run cfn-init with verbose output
           cfn-init.exe -v -s ${AWS::StackName} -r WindowsSQLInstance --region ${AWS::Region} 2>&1 | Tee-Object -FilePath $logFile -Append
           $initExitCode = $lastexitcode
-          
+
           # Log result
           "cfn-init completed with exit code: $initExitCode at $(Get-Date)" | Out-File -FilePath $logFile -Append
-          
+
           # Signal CloudFormation
           cfn-signal.exe -e $initExitCode --stack ${AWS::StackName} --resource WindowsSQLInstance --region ${AWS::Region}
           </powershell>

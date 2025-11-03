@@ -5,7 +5,7 @@ This section details how to run the solution locally and deploy your code change
 ### Pre-Requisites
 
 The following dependencies must be installed:
-- Python >=3.13 and pip
+- Python >=3.12 and pip
 - virtualenv
 - AWS CLI configured with appropriate credentials
 

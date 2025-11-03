@@ -97,8 +97,6 @@ Parameters:
     Type: String
     Default: m6i.2xlarge
 
-
-
   Username:
     Description: The database and instance admin account. Minimum 5 characters must begin with a letter and contain only alphanumeric or "_".
     Type: String
@@ -169,10 +167,22 @@ Resources:
         AvailabilityZones: !Join
           - ','
           - !Ref AvailabilityZones
-        VPCCidr: !FindInMap [Networks, Network0, VPCCidr]
-        VPCName: !FindInMap [Networks, Network0, VPCName]
-        PublicSubnet1Cidr: !FindInMap [Networks, Network0, PublicSubnet1Cidr]
-        PublicSubnet2Cidr: !FindInMap [Networks, Network0, PublicSubnet2Cidr]
+        VPCCidr: !FindInMap
+          - Networks
+          - Network0
+          - VPCCidr
+        VPCName: !FindInMap
+          - Networks
+          - Network0
+          - VPCName
+        PublicSubnet1Cidr: !FindInMap
+          - Networks
+          - Network0
+          - PublicSubnet1Cidr
+        PublicSubnet2Cidr: !FindInMap
+          - Networks
+          - Network0
+          - PublicSubnet2Cidr
 
   VPCNetwork1:
     Type: AWS::CloudFormation::Stack
@@ -183,10 +193,22 @@ Resources:
         AvailabilityZones: !Join
           - ','
           - !Ref AvailabilityZones
-        VPCCidr: !FindInMap [Networks, Network1, VPCCidr]
-        VPCName: !FindInMap [Networks, Network1, VPCName]
-        PublicSubnet1Cidr: !FindInMap [Networks, Network1, PublicSubnet1Cidr]
-        PublicSubnet2Cidr: !FindInMap [Networks, Network1, PublicSubnet2Cidr]
+        VPCCidr: !FindInMap
+          - Networks
+          - Network1
+          - VPCCidr
+        VPCName: !FindInMap
+          - Networks
+          - Network1
+          - VPCName
+        PublicSubnet1Cidr: !FindInMap
+          - Networks
+          - Network1
+          - PublicSubnet1Cidr
+        PublicSubnet2Cidr: !FindInMap
+          - Networks
+          - Network1
+          - PublicSubnet2Cidr
 
   VPCPeering:
     Type: AWS::CloudFormation::Stack
@@ -196,8 +218,14 @@ Resources:
       Parameters:
         VPC0: !GetAtt VPCNetwork0.Outputs.VpcID
         VPC1: !GetAtt VPCNetwork1.Outputs.VpcID
-        VPCCidr0: !FindInMap [Networks, Network0, VPCCidr]
-        VPCCidr1: !FindInMap [Networks, Network1, VPCCidr]
+        VPCCidr0: !FindInMap
+          - Networks
+          - Network0
+          - VPCCidr
+        VPCCidr1: !FindInMap
+          - Networks
+          - Network1
+          - VPCCidr
         VPCPublicSubnet1RouteTable0: !GetAtt VPCNetwork0.Outputs.VPCPublicSubnet1RouteTable
         VPCPublicSubnet2RouteTable0: !GetAtt VPCNetwork0.Outputs.VPCPublicSubnet2RouteTable
         VPCPublicSubnet1RouteTable1: !GetAtt VPCNetwork1.Outputs.VPCPublicSubnet1RouteTable
