@@ -1,3 +1,4 @@
-awscli
-bump2version
-pre-commit
+# Python >=3.11 required
+awscli>=1.32.0
+bump2version>=1.0.1
+pre-commit>=3.6.0

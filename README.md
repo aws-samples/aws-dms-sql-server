@@ -83,13 +83,12 @@ template are pre-populated. Click the *Next* button at the bottom of the page.
 |---------------|-------|-----------|
 |Availability Zones|Requires input|The list of Availability Zones to use for the subnets in the VPCs. *Use two AZs*.|
 |On premise CIDR IP|Requires input|The CIDR Allowed RDP and SQL access to the EC2 and RDS host. CIDR block parameter must be in the form x.x.x.x/0-32.|
-|DMSInstanceClass|dms.t3.large|Instance class of DMS instance.|
-|EC2 instance type|m5.2xlarge|The EC2 instance type for Microsoft SQL server.|
-|Windows server AMI|/aws/service/ami-windows-latest/Windows_Server-2019-English-Full-SQL_2016_SP3_Standard|Query for the Latest Windows AMI Using Systems Manager Parameter Store https://aws.amazon.com/blogs/mt/query-for-the-latest-windows-ami-using-systems-manager-parameter-store/|
-|MSSQL Server version|13|MSSQL Server version. This is used to Change Auth mode from Windows only to SQL and Windows Auth. For MSSQL server 2017 use number 14, for MSSQL server 2016 use number 13.|
-|RDS instance type|db.m5.large|Instance class of RDS instance.|
+|DMSInstanceClass|dms.c6i.large|Instance class of DMS instance.|
+|EC2 instance type|m6i.2xlarge|The EC2 instance type for Microsoft SQL server.|
+|Windows server AMI|/aws/service/ami-windows-latest/Windows_Server-2022-English-Full-SQL_2022_Standard|Query for the Latest Windows AMI Using Systems Manager Parameter Store https://aws.amazon.com/blogs/mt/query-for-the-latest-windows-ami-using-systems-manager-parameter-store/|
+|RDS instance type|db.m6i.large|Instance class of RDS instance.|
 |Database engine type|sqlserver-se|MS SQL engine type. The Enterprise, Standard, Workgroup, and Developer editions are supported. The Web and Express editions aren't supported by AWS DMS.|
-|Database engine version|13.00.6435.0.v1|SQL Server 2016 SP2 (CU3) engine version13.00.5216.0, for all editions and all AWS Regions.|
+|Database engine version|16.00.4215.2.v1|SQL Server 2022 CU21 engine version, for all editions and all AWS Regions.|
 |Windows server and database username|dms_user|The database and instance admin account. Minimum 5 characters must begin with a letter and contain only alphanumeric or "_".|
 |Windows server and database password|Requires input|The password for instance user account. Minimum 8 characters, at least one of each of the following; uppercase, lowercase, number, and symbol character such as !@#$%^&*()<>[]{}|_+-=.|
 |Database name|dms_sample|Database name.|
@@ -111,8 +110,29 @@ template are pre-populated. Click the *Next* button at the bottom of the page.
 
 [Database guide](docs/database/README.md)
 
-### Limitations
-- MSSQL server 2017 doesn't support continues replication. The solution is using MSSQL server 2016 by default.
+### What's New in Version 2.0
+
+This version includes significant upgrades to leverage the latest AWS services and improve performance:
+
+- **SQL Server 2022**: Upgraded from SQL Server 2016 to SQL Server 2022 CU21, providing:
+  - Full support for continuous replication (CDC)
+  - Intelligent Query Processing for better performance
+  - Enhanced security features and latest patches
+  - Improved Always On availability groups
+
+- **6th Generation Instances**: Upgraded to latest generation instance types:
+  - EC2: M6i instances (15% better price-performance vs M5)
+  - RDS: M6i instances (improved I/O throughput)
+  - DMS: C6i compute-optimized instances (better for sustained migration workloads)
+
+- **Python 3.13 Runtime**: Lambda functions now use Python 3.13 for:
+  - Active security support
+  - Improved performance and memory usage
+  - Latest language features
+
+- **Windows Server 2022**: Updated to the latest Windows Server 2022 AMI with SQL Server 2022 Standard
+
+- **Updated Development Tools**: Latest versions of pre-commit hooks, linting tools, and formatters
 
 ## Local Development
 See [Local Development](docs/LOCAL_DEVELOPMENT.md) guide to get a copy of the project up and running on your local machine for development and testing purposes.

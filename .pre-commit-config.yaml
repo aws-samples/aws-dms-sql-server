@@ -5,7 +5,7 @@ repos:
 
 # General
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.5.0
+  rev: v6.0.0
   hooks:
   - id: check-case-conflict
   - id: detect-private-key
@@ -36,14 +36,14 @@ repos:
     files: cfn/.*\.(ya?ml|template)$
 
 - repo: https://github.com/aws-cloudformation/rain
-  rev: v1.6.0
+  rev: v1.20.0
   hooks:
   - id: cfn-format
     files: cfn/.*\.(ya?ml|template)$
 
     # Python
 - repo: https://github.com/pycqa/pylint
-  rev: v3.0.1
+  rev: v4.0.2
   hooks:
     - id: pylint
       args:
@@ -51,12 +51,12 @@ repos:
         - --disable=E0401
 
 - repo: https://github.com/psf/black
-  rev: 23.11.0
+  rev: 25.9.0
   hooks:
     - id: black
 
 - repo: https://github.com/PyCQA/isort
-  rev: 5.12.0
+  rev: 7.0.0
   hooks:
     - id: isort
       args: ["--profile", "black"]

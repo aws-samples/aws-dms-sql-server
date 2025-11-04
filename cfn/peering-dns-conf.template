@@ -14,7 +14,7 @@ Resources:
     Properties:
       CodeUri: ../custom-resource/peering_dns_conf/
       Handler: peering.handler
-      Runtime: python3.7
+      Runtime: python3.12
       Timeout: 30
       Policies:
         - Version: "2012-10-17"

@@ -37,9 +37,10 @@ Parameters:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
     ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/0-32
 
-  MSSQLVersion:
-    Description: MSSQL Server version. This is used to Change Auth mode from Windows only to SQL and Windows Auth For MSSQL server 2017 use number 14, for MSSQL server 2016 use number 13
-    Type: Number
+  MyPublicIP:
+    Type: String
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/0-32
 
 Resources:
   WindowsSQLSecurityGroup:
@@ -61,11 +62,31 @@ Resources:
       IpProtocol: tcp
       ToPort: 3389
 
+  RDPtoEC2SQLSecurityGroupIngressPublic:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      CidrIp: !Ref MyPublicIP
+      Description: rdp-from-my-public-ip
+      FromPort: 3389
+      GroupId: !Ref WindowsSQLSecurityGroup
+      IpProtocol: tcp
+      ToPort: 3389
+
   SQLtoEC2SQLSecurityGroupIngress:
     Type: AWS::EC2::SecurityGroupIngress
     Properties:
       CidrIp: !Ref OnPremCidr
       Description: sql-from-on-prem
+      FromPort: 1433
+      GroupId: !Ref WindowsSQLSecurityGroup
+      IpProtocol: tcp
+      ToPort: 1433
+
+  SQLtoEC2SQLSecurityGroupIngressPublic:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      CidrIp: !Ref MyPublicIP
+      Description: sql-from-my-public-ip
       FromPort: 1433
       GroupId: !Ref WindowsSQLSecurityGroup
       IpProtocol: tcp
@@ -91,7 +112,7 @@ Resources:
     CreationPolicy:
       ResourceSignal:
         Count: 1
-        Timeout: PT30M
+        Timeout: PT90M
     Type: AWS::EC2::Instance
     Metadata:
       AWS::CloudFormation::Init:
@@ -99,7 +120,8 @@ Resources:
           files:
             C:\\cfn\\scripts\\change_auth_mode.ps1:
               content: !Sub |
-                $registryPath = "HKLM:\SOFTWARE\Microsoft\Microsoft SQL Server\MSSQL${MSSQLVersion}.MSSQLSERVER\MSSQLServer"
+                # SQL Server 2022 authentication mode configuration
+                $registryPath = "HKLM:\SOFTWARE\Microsoft\Microsoft SQL Server\MSSQL16.MSSQLSERVER\MSSQLServer"
                 $name = "LoginMode"
                 $value = "2"
                 if (!(Test-Path $registryPath)) {
@@ -199,83 +221,86 @@ Resources:
                     @distribution_db=@distributionDB,
                     @security_mode = 1;
                 GO
-            C:\\cfn\\scripts\\create_rds_db.ps1:
+            C:\\cfn\\scripts\\create_rds_db.sql:
               content: !Sub |
-                $RDSSQLInstance = "${RDSEndpoint}"
-                $RDSSQLUser = "${Username}"
-                $RDSSQLPassword = "${UserPassword}"
-                $DBName = "${DBName}"
-                # Checking to see if the SqlServer module is already installed.
-                $SQLModuleCheck = Get-Module -ListAvailable SqlServer
-                if ($null -eq $SQLModuleCheck) {
-                write-host "SqlServer Module Not Found - Installing..."
-                Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
-                Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
-                # Installing module
-                Install-Module -Name SqlServer -Confirm:$false -AllowClobber -Force
-                }
-                Import-Module SqlServer
-                # Creating SQL Query to create database
-                $SQLDBQuery = "CREATE DATABASE $DBName"
-                # Running the SQL Query, setting result of query to $False if any errors caught
-                Try {
-                $SQLDBResult = $null
-                $SQLDBResult = Invoke-SqlCmd -Query $SQLDBQuery -ServerInstance $RDSSQLInstance -Username $RDSSQLUser -Password $RDSSQLPassword
-                $SQLQuerySuccess = $TRUE
-                }
-                Catch {
-                $SQLQuerySuccess = $FALSE
-                }
-                # Output of the results in cfn/logs
-                "SQLInstance: $RDSSQLInstance"
-                "SQLQueryResult: $SQLQuerySuccess"
-                "SQLQueryOutput:"
-                $SQLDBResult
+                CREATE DATABASE ${DBName};
+                GO
           commands:
             01-create-os-user:
               command: !Sub |
-                net user /add ${Username} ${UserPassword}
+                net user /add ${Username} ${UserPassword} /Y
+              ignoreErrors: true
             02-add-os-user-to-group:
               command: !Sub |
                 net localgroup Administrators ${Username} /add
+              ignoreErrors: true
             03-sql-change-auth-mode:
-              command: PowerShell -Command "C:\\cfn\\scripts\\change_auth_mode.ps1"
+              command: PowerShell -ExecutionPolicy Bypass -NoProfile -Command "C:\\cfn\\scripts\\change_auth_mode.ps1"
+              waitAfterCompletion: 5
             04-restart-sql-server:
-              command: PowerShell -Command "Restart-Service MSSQLSERVER -Force"
+              command: PowerShell -ExecutionPolicy Bypass -NoProfile -Command "Restart-Service MSSQLSERVER -Force; Start-Sleep -Seconds 30"
+              waitAfterCompletion: 10
             05-create-dms-sample:
-              command: sqlcmd -i "C:\\cfn\\scripts\\create_dms_sample.sql" 1> NUL
+              command: sqlcmd -i "C:\\cfn\\scripts\\create_dms_sample.sql" -b
+              waitAfterCompletion: 5
+              ignoreErrors: false
             06-create-dms-user:
-              command: sqlcmd -i "C:\\cfn\\scripts\\create_dms_user.sql" 1> NUL
+              command: sqlcmd -i "C:\\cfn\\scripts\\create_dms_user.sql" -b
+              waitAfterCompletion: 5
+              ignoreErrors: false
             07-dms-sample-backup:
-              command: sqlcmd -i "C:\\cfn\\scripts\\dms_sample_backup.sql" 1> NUL
+              command: sqlcmd -i "C:\\cfn\\scripts\\dms_sample_backup.sql" -b
+              waitAfterCompletion: 5
+              ignoreErrors: false
             08-enable-replication:
-              command: sqlcmd -i "C:\\cfn\\scripts\\enable_replication.sql" 1> NUL
+              command: sqlcmd -i "C:\\cfn\\scripts\\enable_replication.sql" -b
+              waitAfterCompletion: 5
+              ignoreErrors: false
             09-create-rds-db:
-              command: PowerShell -Command "C:\\cfn\\scripts\\create_rds_db.ps1" 1> NUL
+              command: !Sub |
+                sqlcmd -S ${RDSEndpoint} -U ${Username} -P "${UserPassword}" -i "C:\\cfn\\scripts\\create_rds_db.sql" -b
+              waitAfterCompletion: 5
+              ignoreErrors: false
             10-cleanup:
-              command: PowerShell -Command "Remove-Item C:\\cfn\\scripts -Recurse -ErrorAction Ignore"
+              command: PowerShell -ExecutionPolicy Bypass -NoProfile -Command "Remove-Item C:\\cfn\\scripts -Recurse -Force -ErrorAction SilentlyContinue"
     Properties:
       BlockDeviceMappings:
         - DeviceName: /dev/sda1
           Ebs:
             VolumeSize: 100
-            VolumeType: gp2
+            VolumeType: gp3
             Encrypted: true
             DeleteOnTermination: true
       ImageId: !Ref WindowsSQLAMI
       InstanceType: !Ref WindowsSQLInstanceType
       SecurityGroupIds:
         - !Ref WindowsSQLSecurityGroup
-      SubnetId: !Select [0, !Ref PublicSubnets]
+      SubnetId: !Select
+        - 0
+        - !Ref PublicSubnets
       Tags:
         - Key: Name
           Value: windows-sql-server
       UserData: !Base64
         Fn::Sub: |
-          <script>
-          cfn-init.exe -v --stack ${AWS::StackName} --resource WindowsSQLInstance --region ${AWS::Region}
-          cfn-signal.exe -e %errorlevel% --stack ${AWS::StackName} --resource WindowsSQLInstance --region ${AWS::Region}
-          </script>
+          <powershell>
+          # Enable detailed logging
+          $ErrorActionPreference = "Continue"
+          $logFile = "C:\cfn-init.log"
+
+          # Log start
+          "Starting cfn-init at $(Get-Date)" | Out-File -FilePath $logFile -Append
+
+          # Run cfn-init with verbose output
+          cfn-init.exe -v -s ${AWS::StackName} -r WindowsSQLInstance --region ${AWS::Region} 2>&1 | Tee-Object -FilePath $logFile -Append
+          $initExitCode = $lastexitcode
+
+          # Log result
+          "cfn-init completed with exit code: $initExitCode at $(Get-Date)" | Out-File -FilePath $logFile -Append
+
+          # Signal CloudFormation
+          cfn-signal.exe -e $initExitCode --stack ${AWS::StackName} --resource WindowsSQLInstance --region ${AWS::Region}
+          </powershell>
 
 Outputs:
   WindowsSQLInstance:

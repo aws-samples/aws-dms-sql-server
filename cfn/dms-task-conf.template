@@ -17,7 +17,7 @@ Resources:
     Properties:
       CodeUri: ../custom-resource/dms_task_conf/
       Handler: task.handler
-      Runtime: python3.7
+      Runtime: python3.12
       Timeout: 30
       Policies:
         - Version: "2012-10-17"

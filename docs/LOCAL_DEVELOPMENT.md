@@ -5,11 +5,14 @@ This section details how to run the solution locally and deploy your code change
 ### Pre-Requisites
 
 The following dependencies must be installed:
-- Python >=3.8 and pip
+- Python >=3.12 and pip
 - virtualenv
+- AWS CLI configured with appropriate credentials
 
 ### Build local development environment
-Once you have installed pre-requisites, you must run the following command to create a `virtualenv` and install all dependencies before commencing development.
+Once you have installed pre-requisites, you must run the following commands to create a `virtualenv` and install all dependencies before commencing development.
+
+> **Note**: This project is currently being updated to Python 3.13, SQL Server 2022, Windows Server 2022 AMI, and 6th generation EC2/RDS instances (M6i, C6i) for improved performance and security.
 
 1. Create a S3 bucket
    ```
